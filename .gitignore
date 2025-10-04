@@ -1,10 +1,13 @@
-# PIO and VSCode configuration
-.pio
+# VSCode configuration
 .vscode
 /build
-.env 
-.vscode
+
+# Pio configuration
 .pio
+
+# Virtual enviremants
+.env
+.venv
 
 # Prerequisites
 *.d
@@ -47,9 +50,3 @@
 
 # debug information files
 *.dwo
-
-# vscode configuration
-.vscode
-
-# pio configuration
-.pio 
