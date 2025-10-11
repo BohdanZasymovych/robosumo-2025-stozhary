@@ -1,5 +1,6 @@
-# VSCode configuration
+# IDE configuration
 .vscode
+.idea
 /build
 
 # Pio configuration

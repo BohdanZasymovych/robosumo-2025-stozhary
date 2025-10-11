@@ -1,5 +1,4 @@
 #include "motor.h"
-#include <cinttypes>
 #include <Arduino.h>
 
 uint8_t Motor::nextChannel = 0; // Set starting PWN channel
