@@ -8,6 +8,5 @@ Linesensor::Linesensor(uint8_t pin) : pin(pin) {
 }
 
 bool Linesensor::isLineDetected() {
-        Serial.println(digitalRead(pin));
-        return true;
+        return digitalRead(pin);
 }
