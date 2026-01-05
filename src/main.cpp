@@ -3,63 +3,54 @@
 #include "linesensor.h"
 #include "ultrasonic.h"
 #include "robot.h"
+#include "vl53l5cx.h"
 
-constexpr int in1Motor1 = 46;
-constexpr int in2Motor1 = 3;
-constexpr int enableMotor1 = 9;
+// constexpr int in1Motor1 = 46;
+// constexpr int in2Motor1 = 3;
+// constexpr int enableMotor1 = 9;
 
-constexpr int in1Motor2 = 8;
-constexpr int in2Motor2 = 18;
-constexpr int enableMotor2 = 17;
+// constexpr int in1Motor2 = 8;
+// constexpr int in2Motor2 = 18;
+// constexpr int enableMotor2 = 17;
 
-constexpr int linesensorPin = 16;
 
-// Linesensor l1 = Linesensor(linesensorPin);
+// Motor rightMotor = Motor(in1Motor1, in2Motor1, enableMotor1);
+// Motor leftMotor = Motor(in1Motor2, in2Motor2, enableMotor2);
+// Robot robot(leftMotor, rightMotor, 130);
 
-constexpr int trig = 11;
-constexpr int echo = 10;
+#define SDA_PIN 20
+#define SCL_PIN 21
+#define INT_PIN 4
 
-Motor leftMotor = Motor(in1Motor1, in2Motor1, enableMotor1);
-Motor rightMotor = Motor(in1Motor2, in2Motor2, enableMotor2);
-// Ultrasonic ultrasonic = Ultrasonic(trig, echo);
-Robot robot(leftMotor, rightMotor, 150);
+#define VL53L5CX_MEASURING_FREQUENCY 60
+
+void printObjectMatrix();
+
+VL53L5CX sensor = VL53L5CX(SCL_PIN, SDA_PIN, INT_PIN);
+is_object_detected_matrix isObjectDetectedMatrix;
+
+
 void setup() {
     Serial.begin(115200);
-    Serial.println("Robot movement test starting in 5 seconds...");
-    delay(5000);
+    if (!sensor.begin(VL53L5CX_MEASURING_FREQUENCY)) {
+        Serial.println("Sensor initialization failed");
+        while (true) {}
+    }
 }
 
 void loop() {
-    Serial.println("Moving forward...");
-    robot.moveForward();   // їде вперед із базовою швидкістю (150)
-    delay(1000);           // 3 секунди руху
+    sensor.getData(isObjectDetectedMatrix);
+    printObjectMatrix();
+    // sensor.printDistanceMatrix();
+}
 
-    Serial.println("Stopping...");
-    robot.stop();          // зупинка
-    delay(1000);
-
-    Serial.println("Moving BACKWARD...");
-    robot.moveBackward();
-    delay(1000);
-
-    Serial.println("STOP");
-    robot.stop();
-    delay(1000);
-
-    Serial.println("Turning LEFT...");
-    robot.turnLeft();
-    delay(2000);
-
-    Serial.println("Turning RIGHT...");
-    robot.turnRight();
-    delay(2000);
-
-    Serial.println("STOP");
-    robot.stop();
-    delay(2000);
-    
-    Serial.println("Test finished. Robot stopped.");
-    while (true) {
-        // зупиняємо програму, щоб робот не почав рухатись знову
-    }
+void printObjectMatrix() {
+    for (int i = 0; i < IMAGE_SIDE_SIZE; ++i) {
+        for (int j = 0; j < IMAGE_SIDE_SIZE; ++j) {
+          Serial.print(isObjectDetectedMatrix[i][j]);
+          Serial.print("\t");
+        }
+        Serial.println();
+      }
+    Serial.println("-----------------------------------------");
 }

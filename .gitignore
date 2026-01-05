@@ -51,3 +51,11 @@
 
 # debug information files
 *.dwo
+
+# PVS-Studio
+.PVS-Studio
+
+# other
+sensor_test
+sensor_vl53l1x_test
+sensor_vl53l5cx_test
