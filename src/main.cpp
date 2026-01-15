@@ -1,7 +1,5 @@
 #include <Arduino.h>
 #include "motor.h"
-// #include "linesensor.h"
-// #include "ultrasonic.h"
 #include "robot.h"
 #include "vl53l5cx.h"
 

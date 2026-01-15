@@ -34,12 +34,11 @@ bool SensorVL53L1X::begin(TwoWire* i2cBus, VL53L1X::DistanceMode distanceMode, u
 }
 
 void SensorVL53L1X::updateData(uint16_t& placeToWrite) {
-    if (m_dataReadyFlag) {
-        m_dataReadyFlag = false;
+    if (m_dataReadyFlag.exchange(false, std::memory_order_acquire)) {
         placeToWrite = m_sensor.read(false);
     }
 }
 
 void IRAM_ATTR SensorVL53L1X::dataReadyISR() {
-    m_dataReadyFlag = true;
+    m_dataReadyFlag.store(true, std::memory_order_release);
 }

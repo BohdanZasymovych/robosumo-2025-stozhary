@@ -6,6 +6,8 @@
 #define sensorDistanceMode VL53L1X::DistanceMode::Medium
 #define sensorTimingBudget 20000u
 
+FrontSensorArray* FrontSensorArray::s_instance = nullptr;
+
 FrontSensorArray::FrontSensorArray() 
     : m_leftSensor(VL53L1X_LEFT_INT_PIN, VL53L1X_LEFT_XSHUT_PIN, VL53L1X_LEFT_ADDRESS),
     m_centerSensor(VL53L1X_CENTER_INT_PIN, VL53L1X_CENTER_XSHUT_PIN, VL53L1X_CENTER_ADDRESS),
@@ -23,8 +25,35 @@ bool FrontSensorArray::begin(uint32_t timingBudget) {
     if (!m_leftSensor.begin(&Wire, sensorDistanceMode, timingBudget)) {return false;}
     if (!m_centerSensor.begin(&Wire, sensorDistanceMode, timingBudget)) {return false;}
     if (!m_rightSensor.begin(&Wire, sensorDistanceMode, timingBudget)) {return false;}
-
+    
+    attachInterrupts();
+    
     return true;
+}
+
+void FrontSensorArray::attachInterrupts() {
+    s_instance = this;
+    ::attachInterrupt(digitalPinToInterrupt(m_leftSensor.getIntPin()), leftISR, FALLING);
+    ::attachInterrupt(digitalPinToInterrupt(m_centerSensor.getIntPin()), centerISR, FALLING);
+    ::attachInterrupt(digitalPinToInterrupt(m_rightSensor.getIntPin()), rightISR, FALLING);
+}
+
+void IRAM_ATTR FrontSensorArray::leftISR() {
+    if (s_instance) {
+        s_instance->m_leftSensor.dataReadyISR();
+    }
+}
+
+void IRAM_ATTR FrontSensorArray::centerISR() {
+    if (s_instance) {
+        s_instance->m_centerSensor.dataReadyISR();
+    }
+}
+
+void IRAM_ATTR FrontSensorArray::rightISR() {
+    if (s_instance) {
+        s_instance->m_rightSensor.dataReadyISR();
+    }
 }
 
 void FrontSensorArray::updateData(uint16_t& leftSensorPlaceToWrite, uint16_t& centerSensorPlaceToWrite, uint16_t& rightSensorPlaceToWrite) {

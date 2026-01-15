@@ -3,6 +3,7 @@
 
 
 #include <VL53L1X.h>
+#include <atomic>
 
 
 class SensorVL53L1X {
@@ -11,7 +12,7 @@ private:
     const uint8_t m_xShutPin;
     const uint8_t m_address;
 
-    bool volatile m_dataReadyFlag;
+    std::atomic<bool> m_dataReadyFlag;
 
     VL53L1X m_sensor;
 

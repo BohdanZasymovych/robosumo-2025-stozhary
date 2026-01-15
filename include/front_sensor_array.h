@@ -11,6 +11,13 @@ private:
     SensorVL53L1X m_centerSensor;
     SensorVL53L1X m_rightSensor;
     
+    static FrontSensorArray* s_instance;
+    
+    static void IRAM_ATTR leftISR();
+    static void IRAM_ATTR centerISR();
+    static void IRAM_ATTR rightISR();
+    void attachInterrupts();
+
 public:
     FrontSensorArray();
     bool begin(uint32_t timingBudget);
