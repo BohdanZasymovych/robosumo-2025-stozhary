@@ -29,7 +29,7 @@
 // Wire1
 #define I2C_WIRE1_SCL 20
 #define I2C_WIRE1_SDA 21
-#define I2C_WIRE1_CLOCK_FREQ 400000
+#define I2C _WIRE1_CLOCK_FREQ 400000
 
 
 // ========================================
@@ -45,7 +45,7 @@
 #define VL53L1X_CENTER_INT_PIN  7
 #define VL53L1X_CENTER_XSHUT_PIN 10
 #define VL53L1X_CENTER_ADDRESS  0x31
-
+ 
 // Right Sensor
 #define VL53L1X_RIGHT_INT_PIN   11
 #define VL53L1X_RIGHT_XSHUT_PIN 12

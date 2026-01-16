@@ -15,7 +15,7 @@ void setup() {
     Serial.begin(115200);
     
     if (!frontSensorArray.begin(TIMING_BUDGET)) {
-        Serial.println("Sensor initialization failed")
+        Serial.println("Sensor initialization failed");
     }
 }
 
