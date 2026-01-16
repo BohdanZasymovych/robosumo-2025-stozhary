@@ -22,6 +22,7 @@ public:
     void initHardware();
     bool begin(TwoWire* i2cBus, VL53L1X::DistanceMode distanceMode, uint32_t timingBudget);
     void updateData(uint16_t& placeToWrite);
+    void clearPendingInterrupt();
 
     void IRAM_ATTR dataReadyISR();
 };

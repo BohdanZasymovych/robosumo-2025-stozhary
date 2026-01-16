@@ -3,7 +3,7 @@
 #include "robot.h"
 #include "front_sensor_array.h"
 
-#define TIMING_BUDGET 20000
+#define SENSOR_TIMING_BUDGET_US 20000u
 
 uint16_t leftSensorDistance = 0;
 uint16_t centerSensorDistance = 0;
@@ -14,9 +14,12 @@ FrontSensorArray frontSensorArray;
 void setup() {
     Serial.begin(115200);
     
-    if (!frontSensorArray.begin(TIMING_BUDGET)) {
+    if (!frontSensorArray.begin(SENSOR_TIMING_BUDGET_US)) {
         Serial.println("Sensor initialization failed");
+        while (true) {}
     }
+
+    Serial.println("Sensor initialization successful");
 }
 
 void loop() {
@@ -29,5 +32,5 @@ void loop() {
                   centerSensorDistance, 
                   rightSensorDistance);
 
-    delay(20);
+    delay(1000);
 }

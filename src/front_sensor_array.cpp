@@ -4,7 +4,6 @@
 
 
 #define sensorDistanceMode VL53L1X::DistanceMode::Medium
-#define sensorTimingBudget 20000u
 
 FrontSensorArray* FrontSensorArray::s_instance = nullptr;
 
@@ -21,13 +20,16 @@ bool FrontSensorArray::begin(uint32_t timingBudget) {
     m_centerSensor.initHardware();
     m_rightSensor.initHardware();
 
-    
     if (!m_leftSensor.begin(&Wire, sensorDistanceMode, timingBudget)) {return false;}
     if (!m_centerSensor.begin(&Wire, sensorDistanceMode, timingBudget)) {return false;}
     if (!m_rightSensor.begin(&Wire, sensorDistanceMode, timingBudget)) {return false;}
     
     attachInterrupts();
     
+    m_leftSensor.clearPendingInterrupt();
+    m_centerSensor.clearPendingInterrupt();
+    m_rightSensor.clearPendingInterrupt();
+
     return true;
 }
 

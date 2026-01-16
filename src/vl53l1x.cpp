@@ -22,6 +22,7 @@ bool SensorVL53L1X::begin(TwoWire* i2cBus, VL53L1X::DistanceMode distanceMode, u
     delay(2);
 
     m_sensor.setBus(i2cBus);
+    m_sensor.setTimeout(500);
 
     if (!m_sensor.init()) {return false;}
 
@@ -38,6 +39,15 @@ void SensorVL53L1X::updateData(uint16_t& placeToWrite) {
         placeToWrite = m_sensor.read(false);
     }
 }
+
+void SensorVL53L1X::clearPendingInterrupt() {
+    if (m_sensor.dataReady()) {
+        m_sensor.read(false);
+    }
+
+    m_dataReadyFlag.store(false, std::memory_order_release);
+}
+
 
 void IRAM_ATTR SensorVL53L1X::dataReadyISR() {
     m_dataReadyFlag.store(true, std::memory_order_release);
