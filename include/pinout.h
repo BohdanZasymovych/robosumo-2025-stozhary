@@ -6,13 +6,13 @@
 // MOTOR PINS
 // ========================================
 
-//Right Motor
-#define MOTOR_RIGHT_LPWM 8
-#define MOTOR_RIGHT_RPWM 18
+// Right Motor
+#define MOTOR_RIGHT_LPWM 9
+#define MOTOR_RIGHT_RPWM 8
 
 // Left Motor
-#define MOTOR_LEFT_LPWM 8
-#define MOTOR_LEFT_RPWM 18
+#define MOTOR_LEFT_LPWM 6
+#define MOTOR_LEFT_RPWM 7
 
 
 // ========================================

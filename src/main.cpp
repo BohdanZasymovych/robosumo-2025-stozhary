@@ -1,36 +1,27 @@
 #include <Arduino.h>
 #include "motor.h"
 #include "robot.h"
-#include "front_sensor_array.h"
+#include "pinout.h"
 
-#define SENSOR_TIMING_BUDGET_US 20000u
+Motor motorLeft(MOTOR_LEFT_LPWM, MOTOR_LEFT_RPWM);
+Motor motorRight(MOTOR_RIGHT_LPWM, MOTOR_RIGHT_RPWM);
+Robot robot(motorLeft, motorRight, 255);
 
-uint16_t leftSensorDistance = 0;
-uint16_t centerSensorDistance = 0;
-uint16_t rightSensorDistance = 0;
-
-FrontSensorArray frontSensorArray;
 
 void setup() {
-    Serial.begin(115200);
-    
-    if (!frontSensorArray.begin(SENSOR_TIMING_BUDGET_US)) {
-        Serial.println("Sensor initialization failed");
-        while (true) {}
-    }
-
-    Serial.println("Sensor initialization successful");
+    delay(5000);
 }
 
 void loop() {
-    frontSensorArray.updateData(leftSensorDistance,
-                            centerSensorDistance,
-                            rightSensorDistance);
+    robot.moveForward();
+    delay(5000);
 
-    Serial.printf("left: %d, center: %d, right: %d\n", 
-                  leftSensorDistance, 
-                  centerSensorDistance, 
-                  rightSensorDistance);
+    robot.moveBackward();
+    delay(5000);
 
-    // delay(500);
+    robot.turnLeft();
+    delay(5000);
+
+    robot.turnRight();
+    delay(5000);
 }

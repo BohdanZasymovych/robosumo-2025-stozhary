@@ -2,9 +2,11 @@
 #include <Arduino.h>
 
 
-Robot::Robot(Motor& left, Motor& right, uint8_t baseSpeed): leftMotor(left), rightMotor(right), baseSpeed(baseSpeed) {
-    leftMotor.stop();
-    rightMotor.stop();
+Robot::Robot(Motor& left, Motor& right, uint8_t baseSpeed)
+    : leftMotor(left)
+    , rightMotor(right)
+    , baseSpeed(baseSpeed) {
+    stop();
 }
 
 void Robot::setSpeed(uint8_t newSpeed) {

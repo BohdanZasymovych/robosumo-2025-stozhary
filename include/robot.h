@@ -9,8 +9,8 @@ class Robot  {
     static constexpr uint8_t MAX_SPEED = 255;
 
 private:
-    Motor leftMotor;
-    Motor rightMotor;
+    Motor& leftMotor;
+    Motor& rightMotor;
     uint8_t baseSpeed;
 
 public:
