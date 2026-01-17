@@ -32,5 +32,5 @@ void loop() {
                   centerSensorDistance, 
                   rightSensorDistance);
 
-    delay(1000);
+    // delay(500);
 }

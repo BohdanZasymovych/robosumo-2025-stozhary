@@ -1,4 +1,5 @@
 #include "vl53l1x.h"
+#include <climits>
 
 
 SensorVL53L1X::SensorVL53L1X(uint8_t intPin, uint8_t xShutPin, uint8_t address)
@@ -36,7 +37,9 @@ bool SensorVL53L1X::begin(TwoWire* i2cBus, VL53L1X::DistanceMode distanceMode, u
 
 void SensorVL53L1X::updateData(uint16_t& placeToWrite) {
     if (m_dataReadyFlag.exchange(false, std::memory_order_acquire)) {
-        placeToWrite = m_sensor.read(false);
+        m_sensor.read(false);
+        placeToWrite = (m_sensor.ranging_data.range_status != 0) ? UINT16_MAX : m_sensor.ranging_data.range_mm;
+        // Serial.printf("range_mm: %d, range_status: %d, peak_signal_count_rate_MCPS: %f, ambient_count_rate_MCPS: %f\n", m_sensor.ranging_data.range_mm, m_sensor.ranging_data.range_status, m_sensor.ranging_data.peak_signal_count_rate_MCPS, m_sensor.ranging_data.ambient_count_rate_MCPS);
     }
 }
 

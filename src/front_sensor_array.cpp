@@ -3,7 +3,7 @@
 #include <Wire.h>
 
 
-#define sensorDistanceMode VL53L1X::DistanceMode::Medium
+#define sensorDistanceMode VL53L1X::DistanceMode::Short
 
 FrontSensorArray* FrontSensorArray::s_instance = nullptr;
 
