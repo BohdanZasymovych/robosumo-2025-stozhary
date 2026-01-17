@@ -1,28 +1,30 @@
 #ifndef ROBOT_H
 #define ROBOT_H
 
+
 #include "motor.h"
 
+
 class Robot  {
-    static constexpr int MAX_SPEED = 255;
-    private:
-        Motor leftMotor;
-        Motor rightMotor;
-        int baseSpeed;
+    static constexpr uint8_t MAX_SPEED = 255;
 
-    public :
+private:
+    Motor leftMotor;
+    Motor rightMotor;
+    uint8_t baseSpeed;
 
-    Robot(Motor& left, Motor& right, int baseSpeed = 200);
+public:
+    Robot(Motor& left, Motor& right, uint8_t baseSpeed = 200);
     
-    void setSpeed(int newSpeed);
+    void setSpeed(uint8_t newSpeed);
+    uint8_t getSpeed() const;
 
-    int getSpeed() const;
-
-    void moveForward(unsigned int baseSpeed = 0);
-    void moveBackward(unsigned int  = 0);
-    void turnLeft(unsigned int baseSpeed = 0);
-    void turnRight(unsigned int baSespeed = 0);
+    void moveForward(uint8_t baseSpeed = 0);
+    void moveBackward(uint8_t baseSpeed = 0);
+    void turnLeft(uint8_t baseSpeed = 0);
+    void turnRight(uint8_t baseSpeed = 0);
     void stop();
-
 };
+
+
 #endif

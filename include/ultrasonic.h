@@ -1,9 +1,8 @@
 #ifndef ULTRASONIC_H
 #define ULTRASONIC_H
 
-#pragma once
-
 #include <cinttypes>
+
 
 class Ultrasonic{
     const uint8_t trigPin;
