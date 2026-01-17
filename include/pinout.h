@@ -7,12 +7,12 @@
 // ========================================
 
 //Right Motor
-#define MOTOR_LEFT_LPWM 8
+#define MOTOR_RIGHT_LPWM 8
 #define MOTOR_RIGHT_RPWM 18
 
 // Left Motor
 #define MOTOR_LEFT_LPWM 8
-#define MOTOR_RIGHT_RPWM 18
+#define MOTOR_LEFT_RPWM 18
 
 
 // ========================================
