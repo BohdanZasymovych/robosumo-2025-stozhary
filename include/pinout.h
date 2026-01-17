@@ -7,14 +7,12 @@
 // ========================================
 
 //Right Motor
-#define MOTOR_RIGHT_FORWARD     46
-#define MOTOR_RIGHT_BACKWARD    3
-#define MOTOR_RIGHT_SPEED       9
+#define MOTOR_LEFT_LPWM 8
+#define MOTOR_RIGHT_RPWM 18
 
 // Left Motor
-#define MOTOR_LEFT_FORWARD      8
-#define MOTOR_LEFT_BACKWARD     18
-#define MOTOR_LEFT_SPEED        17
+#define MOTOR_LEFT_LPWM 8
+#define MOTOR_RIGHT_RPWM 18
 
 
 // ========================================
