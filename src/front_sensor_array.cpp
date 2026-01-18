@@ -3,7 +3,8 @@
 #include <Wire.h>
 
 
-#define sensorDistanceMode VL53L1X::DistanceMode::Short
+#define SENSOR_DISTANCE_MODE VL53L1X::DistanceMode::Short
+#define TIMING_BUDGET 20000u
 
 FrontSensorArray* FrontSensorArray::s_instance = nullptr;
 
@@ -12,7 +13,7 @@ FrontSensorArray::FrontSensorArray()
     m_centerSensor(VL53L1X_CENTER_INT_PIN, VL53L1X_CENTER_XSHUT_PIN, VL53L1X_CENTER_ADDRESS),
     m_rightSensor(VL53L1X_RIGHT_INT_PIN, VL53L1X_RIGHT_XSHUT_PIN, VL53L1X_RIGHT_ADDRESS) {}
 
-bool FrontSensorArray::begin(uint32_t timingBudget) {
+bool FrontSensorArray::begin() {
     Wire.begin(I2C_WIRE_SDA, I2C_WIRE_SCL);
     Wire.setClock(I2C_WIRE_CLOCK_FREQ);
 
@@ -20,9 +21,9 @@ bool FrontSensorArray::begin(uint32_t timingBudget) {
     m_centerSensor.initHardware();
     m_rightSensor.initHardware();
 
-    if (!m_leftSensor.begin(&Wire, sensorDistanceMode, timingBudget)) {return false;}
-    if (!m_centerSensor.begin(&Wire, sensorDistanceMode, timingBudget)) {return false;}
-    if (!m_rightSensor.begin(&Wire, sensorDistanceMode, timingBudget)) {return false;}
+    if (!m_leftSensor.begin(&Wire, SENSOR_DISTANCE_MODE, TIMING_BUDGET)) {return false;}
+    if (!m_centerSensor.begin(&Wire, SENSOR_DISTANCE_MODE, TIMING_BUDGET)) {return false;}
+    if (!m_rightSensor.begin(&Wire, SENSOR_DISTANCE_MODE, TIMING_BUDGET)) {return false;}
     
     attachInterrupts();
     

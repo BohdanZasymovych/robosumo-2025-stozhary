@@ -20,7 +20,7 @@ private:
 
 public:
     FrontSensorArray();
-    bool begin(uint32_t timingBudget);
+    bool begin();
     void updateData(uint16_t& leftSensorPlaceToWrite,
                     uint16_t& centerSensorPlaceToWrite,
                     uint16_t& rightSensorPlaceToWrite);
