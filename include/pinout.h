@@ -25,13 +25,13 @@
 #define I2C_WIRE_CLOCK_FREQ 400000
 
 // Wire1
-// #define I2C_WIRE1_SCL 20
-// #define I2C_WIRE1_SDA 21
-// #define I2C_WIRE1_CLOCK_FREQ 400000
+#define I2C_WIRE1_SCL 20
+#define I2C_WIRE1_SDA 21
+#define I2C_WIRE1_CLOCK_FREQ 400000
 
 
 // ========================================
-// VL53L1X SENSORS (ToF Distance Sensors)
+// VL53L1X FRONT SENSORS 
 // ========================================
 
 // Left Sensor
@@ -48,6 +48,21 @@
 #define VL53L1X_RIGHT_INT_PIN   13
 #define VL53L1X_RIGHT_XSHUT_PIN 14
 #define VL53L1X_RIGHT_ADDRESS   0x32
+
+
+// ========================================
+// VL53L0X SIDE SENSORS 
+// ========================================
+
+// Left Sensor
+#define VL53L0X_LEFT_INT_PIN    4
+#define VL53L0X_LEFT_XSHUT_PIN  5
+#define VL53L0X_LEFT_ADDRESS    0x33
+ 
+// Right Sensor
+#define VL53L0X_RIGHT_INT_PIN   13
+#define VL53L0X_RIGHT_XSHUT_PIN 14
+#define VL53L0X_RIGHT_ADDRESS   0x34
 
 
 // ========================================
