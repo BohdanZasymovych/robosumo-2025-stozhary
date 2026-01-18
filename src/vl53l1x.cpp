@@ -20,7 +20,7 @@ void SensorVL53L1X::initHardware() {
 
 bool SensorVL53L1X::begin(TwoWire* i2cBus, VL53L1X::DistanceMode distanceMode, uint32_t timingBudgetUs) {
     digitalWrite(m_xShutPin, HIGH);
-    delay(2);
+    delay(10);
 
     m_sensor.setBus(i2cBus);
     m_sensor.setTimeout(500);
@@ -30,7 +30,7 @@ bool SensorVL53L1X::begin(TwoWire* i2cBus, VL53L1X::DistanceMode distanceMode, u
     m_sensor.setAddress(m_address);
     m_sensor.setDistanceMode(distanceMode);
     m_sensor.setMeasurementTimingBudget(timingBudgetUs);
-    m_sensor.startContinuous(timingBudgetUs/1000);
+    m_sensor.startContinuous();
 
     return true;
 }
