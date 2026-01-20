@@ -31,38 +31,38 @@
 
 
 // ========================================
-// VL53L1X FRONT SENSORS 
+// FRONT SENSORS (VL53L0X left/right, VL53L1X center)
 // ========================================
 
-// Left Sensor
-#define VL53L1X_LEFT_INT_PIN    4
-#define VL53L1X_LEFT_XSHUT_PIN  5
-#define VL53L1X_LEFT_ADDRESS    0x30
+// Left Sensor VL53L0X
+#define FRONT_LEFT_INT_PIN      4
+#define FRONT_LEFT_XSHUT_PIN    5
+#define FRONT_LEFT_ADDRESS      0x30
 
-// Center Sensor
-#define VL53L1X_CENTER_INT_PIN  8
-#define VL53L1X_CENTER_XSHUT_PIN 9
-#define VL53L1X_CENTER_ADDRESS  0x31
+// Center Sensor VL53L1X
+#define FRONT_CENTER_INT_PIN    2
+#define FRONT_CENTER_XSHUT_PIN  3
+#define FRONT_CENTER_ADDRESS    0x31
  
-// Right Sensor
-#define VL53L1X_RIGHT_INT_PIN   13
-#define VL53L1X_RIGHT_XSHUT_PIN 14
-#define VL53L1X_RIGHT_ADDRESS   0x32
+// Right Sensor VL53L0X
+#define FRONT_RIGHT_INT_PIN     10
+#define FRONT_RIGHT_XSHUT_PIN   11
+#define FRONT_RIGHT_ADDRESS     0x32
 
 
 // ========================================
-// VL53L0X SIDE SENSORS 
+// SIDE SENSORS (VL53L0X)
 // ========================================
 
-// Left Sensor
-#define VL53L0X_LEFT_INT_PIN    4
-#define VL53L0X_LEFT_XSHUT_PIN  5
-#define VL53L0X_LEFT_ADDRESS    0x33
+// Left Side Sensor
+#define SIDE_LEFT_INT_PIN       12
+#define SIDE_LEFT_XSHUT_PIN     13
+#define SIDE_LEFT_ADDRESS       0x33
  
-// Right Sensor
-#define VL53L0X_RIGHT_INT_PIN   13
-#define VL53L0X_RIGHT_XSHUT_PIN 14
-#define VL53L0X_RIGHT_ADDRESS   0x34
+// Right Side Sensor
+#define SIDE_RIGHT_INT_PIN      14
+#define SIDE_RIGHT_XSHUT_PIN    15
+#define SIDE_RIGHT_ADDRESS      0x34
 
 
 // ========================================

@@ -2,17 +2,25 @@
 #include "front_sensor_array.h"
 #include <Wire.h>
 
+// VL53L1X
+#define VL53L1X_SENSOR_DISTANCE_MODE VL53L1X::DistanceMode::Short
+#define VL53L1X_MEASUREMENT_TIMING_BUDGET 20000u
 
-#define sensorDistanceMode VL53L1X::DistanceMode::Short
+// VL53L0X
+#define VL53L0X_SIGNAL_RATE_LIMIT 0.25
+#define VL53L0X_VCSEL_PULSE_PERIOD_PRE 14u
+#define VL53L0X_VCSEL_PULSE_PERIOD_FINAL 10u
+#define VL53L0X_MEASUREMENT_TIMING_BUDGET 20000u
+
 
 FrontSensorArray* FrontSensorArray::s_instance = nullptr;
 
 FrontSensorArray::FrontSensorArray() 
-    : m_leftSensor(VL53L1X_LEFT_INT_PIN, VL53L1X_LEFT_XSHUT_PIN, VL53L1X_LEFT_ADDRESS),
-    m_centerSensor(VL53L1X_CENTER_INT_PIN, VL53L1X_CENTER_XSHUT_PIN, VL53L1X_CENTER_ADDRESS),
-    m_rightSensor(VL53L1X_RIGHT_INT_PIN, VL53L1X_RIGHT_XSHUT_PIN, VL53L1X_RIGHT_ADDRESS) {}
+    : m_leftSensor(FRONT_LEFT_INT_PIN, FRONT_LEFT_XSHUT_PIN, FRONT_LEFT_ADDRESS),
+    m_centerSensor(FRONT_CENTER_INT_PIN, FRONT_CENTER_XSHUT_PIN, FRONT_CENTER_ADDRESS),
+    m_rightSensor(FRONT_RIGHT_INT_PIN, FRONT_RIGHT_XSHUT_PIN, FRONT_RIGHT_ADDRESS) {}
 
-bool FrontSensorArray::begin(uint32_t timingBudget) {
+bool FrontSensorArray::begin() {
     Wire.begin(I2C_WIRE_SDA, I2C_WIRE_SCL);
     Wire.setClock(I2C_WIRE_CLOCK_FREQ);
 
@@ -20,9 +28,10 @@ bool FrontSensorArray::begin(uint32_t timingBudget) {
     m_centerSensor.initHardware();
     m_rightSensor.initHardware();
 
-    if (!m_leftSensor.begin(&Wire, sensorDistanceMode, timingBudget)) {return false;}
-    if (!m_centerSensor.begin(&Wire, sensorDistanceMode, timingBudget)) {return false;}
-    if (!m_rightSensor.begin(&Wire, sensorDistanceMode, timingBudget)) {return false;}
+
+    if (!m_leftSensor.begin(&Wire, VL53L0X_SIGNAL_RATE_LIMIT, VL53L0X_VCSEL_PULSE_PERIOD_PRE, VL53L0X_VCSEL_PULSE_PERIOD_FINAL, VL53L0X_MEASUREMENT_TIMING_BUDGET)) { return false; }
+    if (!m_centerSensor.begin(&Wire, VL53L1X_SENSOR_DISTANCE_MODE, VL53L1X_MEASUREMENT_TIMING_BUDGET)) { return false; }
+    if (!m_rightSensor.begin(&Wire, VL53L0X_SIGNAL_RATE_LIMIT, VL53L0X_VCSEL_PULSE_PERIOD_PRE, VL53L0X_VCSEL_PULSE_PERIOD_FINAL, VL53L0X_MEASUREMENT_TIMING_BUDGET)) { return false; }
     
     attachInterrupts();
     
