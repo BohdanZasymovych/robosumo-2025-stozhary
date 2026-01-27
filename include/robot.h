@@ -23,7 +23,9 @@ public:
     void moveBackward(uint8_t baseSpeed = 0);
     void turnLeft(uint8_t baseSpeed = 0);
     void turnRight(uint8_t baseSpeed = 0);
+    void turnMove(uint8_t leftSpeed, uint8_t rightSpeed);
     void stop();
+
 };
 
 

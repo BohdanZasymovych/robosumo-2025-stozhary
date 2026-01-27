@@ -44,7 +44,11 @@ void Robot::turnRight(uint8_t speed) {
     leftMotor.rotateForward(speed);
     rightMotor.rotateBackward(speed);
 }
-
+void Robot::turnMove(uint8_t leftSpeed, uint8_t rightSpeed) {
+    
+    leftMotor.rotateForward(leftSpeed);
+    rightMotor.rotateForward(rightSpeed);
+}
 void Robot::stop() {
     leftMotor.stop();
     rightMotor.stop();

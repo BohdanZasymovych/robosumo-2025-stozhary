@@ -15,6 +15,5 @@ struct SensorData {
 };
 
 void executeStrategy(Robot& robot, SensorData& sensorData);
-
-
+void 
 #endif
