@@ -1,3 +1,4 @@
+/*
 #include "pinout.h"
 #include "side_sensors.h"
 #include <Wire.h>
@@ -54,3 +55,4 @@ void SideSensors::updateData(uint16_t& leftSensorPlaceToWrite, uint16_t& rightSe
     m_leftSensor.updateData(leftSensorPlaceToWrite);
     m_rightSensor.updateData(rightSensorPlaceToWrite);
 }
+*/

@@ -1,3 +1,4 @@
+/*
 #include "pinout.h"
 #include "front_sensor_array.h"
 #include <Wire.h>
@@ -72,3 +73,4 @@ void FrontSensorArray::updateData(uint16_t& leftSensorPlaceToWrite, uint16_t& ce
     m_centerSensor.updateData(centerSensorPlaceToWrite);
     m_rightSensor.updateData(rightSensorPlaceToWrite);
 }
+*/
