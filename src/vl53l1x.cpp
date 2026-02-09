@@ -30,7 +30,7 @@ bool SensorVL53L1X::begin(TwoWire* i2cBus, VL53L1X::DistanceMode distanceMode, u
     m_sensor.setAddress(m_address);
     m_sensor.setDistanceMode(distanceMode);
     m_sensor.setMeasurementTimingBudget(timingBudgetUs);
-    m_sensor.startContinuous();
+    m_sensor.startContinuous(0);
 
     return true;
 }
