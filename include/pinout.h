@@ -69,7 +69,7 @@
 // LINE SENSORS
 // ========================================
 
-#define LINE_SENSOR_LEFT 42
-#define LINE_SENSOR_RIGHT 4
+#define LINE_SENSOR_LEFT 4
+#define LINE_SENSOR_RIGHT 42
 
 #endif // PINOUT_H
