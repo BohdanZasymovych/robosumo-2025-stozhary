@@ -9,7 +9,7 @@
 
 Motor motorLeft(MOTOR_LEFT_LPWM, MOTOR_LEFT_RPWM);
 Motor motorRight(MOTOR_RIGHT_LPWM, MOTOR_RIGHT_RPWM);
-Robot robot(motorLeft, motorRight, 255);
+Robot robot(motorLeft, motorRight, 100);
 
 FrontSensorArray frontSensorArray;
 SideSensors sideSensorArray;
@@ -29,19 +29,17 @@ void loop() {
     sideSensorArray.updateData(sensorData.sideLeftSensorDistance,
                             sensorData.sideRightSensorDistance);
 
-    Serial.print("Front Left: ");
-    Serial.print(sensorData.frontLeftSensorDistance);
-    Serial.print("\tFront Center: ");
-    Serial.print(sensorData.frontCenterSensorDistance);
-    Serial.print("\tFront Right: ");
-    Serial.print(sensorData.frontRightSensorDistance);
-    Serial.print("\tSide Left: ");
-    Serial.print(sensorData.sideLeftSensorDistance);
-    Serial.print("\tSide Right: ");
-    Serial.print(sensorData.sideRightSensorDistance);
-    Serial.print("\n");
-
-    delay(100);
-
-    // executeStrategy(robot, sensorData);
+    // Serial.print("Front Left: ");
+    // Serial.print(sensorData.frontLeftSensorDistance);
+    // Serial.print("\tFront Center: ");
+    // Serial.print(sensorData.frontCenterSensorDistance);
+    // Serial.print("\tFront Right: ");
+    // Serial.print(sensorData.frontRightSensorDistance);
+    // Serial.print("\tSide Left: ");
+    // Serial.print(sensorData.sideLeftSensorDistance);
+    // Serial.print("\tSide Right: ");
+    // Serial.print(sensorData.sideRightSensorDistance);
+    // Serial.print("\n");
+    
+    executeStrategy(robot, sensorData);
 }

@@ -7,8 +7,8 @@
 // ========================================
 
 // Left Motor
-#define MOTOR_LEFT_LPWM 1
-#define MOTOR_LEFT_RPWM 2
+#define MOTOR_LEFT_LPWM 2 // Pins swaped to ensure right direction of the left motor rotation
+#define MOTOR_LEFT_RPWM 1
 
 // Right Motor
 #define MOTOR_RIGHT_LPWM 6
@@ -50,17 +50,17 @@
 // VL53L0X / VL53L1X FRONT SENSORS 
 // ========================================
 
-// Left Sensor
+// Left Sensor (VL53L0X)
 #define VL53L0X_FRONT_LEFT_INT_PIN    35
 #define VL53L0X_FRONT_LEFT_XSHUT_PIN  36
 #define VL53L0X_FRONT_LEFT_ADDRESS    0x30
 
-// Center Sensor
+// Center Sensor (VL53L1X)
 #define VL53L1X_FRONT_CENTER_INT_PIN  37
 #define VL53L1X_FRONT_CENTER_XSHUT_PIN 38
 #define VL53L1X_FRONT_CENTER_ADDRESS  0x31
  
-// Right Sensor
+// Right Sensor (VL53L0X)
 #define VL53L0X_FRONT_RIGHT_INT_PIN   39
 #define VL53L0X_FRONT_RIGHT_XSHUT_PIN 40
 #define VL53L0X_FRONT_RIGHT_ADDRESS   0x32
@@ -85,7 +85,7 @@
 // LINE SENSORS
 // ========================================
 
-#define LINE_SENSOR_LEFT 4
-#define LINE_SENSOR_RIGHT 42
+#define LINE_SENSOR_LEFT 42
+#define LINE_SENSOR_RIGHT 4
 
 #endif // PINOUT_H
