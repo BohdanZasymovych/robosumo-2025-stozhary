@@ -1,12 +1,7 @@
-#include "pinout.h"
+#include "config.h"
 #include "side_sensors.h"
 #include <Wire.h>
 
-
-#define SIGNAL_RATE_LIMIT 0.25
-#define VCSEL_PULSE_PERIOD_PRE 14u
-#define VCSEL_PULSE_PERIOD_FINAL 10u
-#define MEASUREMENT_TIMING_BUDGET 20000u
 
 SideSensors* SideSensors::s_instance = nullptr;
 
@@ -21,8 +16,8 @@ bool SideSensors::begin() {
     m_leftSensor.initHardware();
     m_rightSensor.initHardware();
 
-    if (!m_leftSensor.begin(&Wire1, SIGNAL_RATE_LIMIT, VCSEL_PULSE_PERIOD_PRE, VCSEL_PULSE_PERIOD_FINAL, MEASUREMENT_TIMING_BUDGET)) { return false; }
-    if (!m_rightSensor.begin(&Wire1, SIGNAL_RATE_LIMIT, VCSEL_PULSE_PERIOD_PRE, VCSEL_PULSE_PERIOD_FINAL, MEASUREMENT_TIMING_BUDGET)) { return false; }
+    if (!m_leftSensor.begin(&Wire1, VL53L0X_SIGNAL_RATE_LIMIT, VL53L0X_VCSEL_PULSE_PERIOD_PRE, VL53L0X_VCSEL_PULSE_PERIOD_FINAL, VL53L0X_MEASUREMENT_TIMING_BUDGET)) { return false; }
+    if (!m_rightSensor.begin(&Wire1, VL53L0X_SIGNAL_RATE_LIMIT, VL53L0X_VCSEL_PULSE_PERIOD_PRE, VL53L0X_VCSEL_PULSE_PERIOD_FINAL, VL53L0X_MEASUREMENT_TIMING_BUDGET)) { return false; }
     
     attachInterrupts();
     

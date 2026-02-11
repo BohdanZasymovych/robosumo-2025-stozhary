@@ -2,14 +2,15 @@
 #define FRONT_SENSOR_ARRAY_H
 
 
+#include "vl53l0x.h"
 #include "vl53l1x.h"
 
 
 class FrontSensorArray {
 private:
-    SensorVL53L1X m_leftSensor;
+    SensorVL53L0X m_leftSensor;
     SensorVL53L1X m_centerSensor;
-    SensorVL53L1X m_rightSensor;
+    SensorVL53L0X m_rightSensor;
     
     static FrontSensorArray* s_instance;
     

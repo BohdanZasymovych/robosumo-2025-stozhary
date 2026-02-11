@@ -31,23 +31,39 @@
 
 
 // ========================================
-// VL53L1X FRONT SENSORS 
+// VL53L0X SENSORS SETTINGS 
+// ========================================
+#define VL53L0X_SIGNAL_RATE_LIMIT 0.25
+#define VL53L0X_VCSEL_PULSE_PERIOD_PRE 14u
+#define VL53L0X_VCSEL_PULSE_PERIOD_FINAL 10u
+#define VL53L0X_MEASUREMENT_TIMING_BUDGET 20000u
+
+
+// ========================================
+// VL53L1X SENSORS SETTINGS 
+// ========================================
+#define VL53L1X_SENSOR_DISTANCE_MODE VL53L1X::DistanceMode::Short
+#define VL53L1X_TIMING_BUDGET 20000u
+
+
+// ========================================
+// VL53L0X / VL53L1X FRONT SENSORS 
 // ========================================
 
 // Left Sensor
-#define VL53L1X_LEFT_INT_PIN    35
-#define VL53L1X_LEFT_XSHUT_PIN  36
-#define VL53L1X_LEFT_ADDRESS    0x30
+#define VL53L0X_FRONT_LEFT_INT_PIN    35
+#define VL53L0X_FRONT_LEFT_XSHUT_PIN  36
+#define VL53L0X_FRONT_LEFT_ADDRESS    0x30
 
 // Center Sensor
-#define VL53L1X_CENTER_INT_PIN  37
-#define VL53L1X_CENTER_XSHUT_PIN 38
-#define VL53L1X_CENTER_ADDRESS  0x31
+#define VL53L1X_FRONT_CENTER_INT_PIN  37
+#define VL53L1X_FRONT_CENTER_XSHUT_PIN 38
+#define VL53L1X_FRONT_CENTER_ADDRESS  0x31
  
 // Right Sensor
-#define VL53L1X_RIGHT_INT_PIN   39
-#define VL53L1X_RIGHT_XSHUT_PIN 40
-#define VL53L1X_RIGHT_ADDRESS   0x32
+#define VL53L0X_FRONT_RIGHT_INT_PIN   39
+#define VL53L0X_FRONT_RIGHT_XSHUT_PIN 40
+#define VL53L0X_FRONT_RIGHT_ADDRESS   0x32
 
 
 // ========================================
