@@ -88,4 +88,6 @@
 #define LINE_SENSOR_LEFT 42
 #define LINE_SENSOR_RIGHT 4
 
+#define WIFI_SSID "UCU_Guest"
+#define WIFI_PASS ""
 #endif // PINOUT_H
