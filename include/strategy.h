@@ -12,6 +12,9 @@ struct SensorData {
 
     uint16_t sideLeftSensorDistance;
     uint16_t sideRightSensorDistance;
+
+    bool lineLeftDetected;
+    bool lineRightDetected;
 };
 
 void executeStrategy(Robot& robot, SensorData& sensorData);

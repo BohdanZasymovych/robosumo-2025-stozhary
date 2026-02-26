@@ -2,13 +2,17 @@
 #include <Arduino.h>
 
 
-#define MAX_DISTANCE_MM 1200
+#define MAX_DISTANCE_MM 900
 #define  MEMORY_MS 1200
 
 static constexpr uint8_t SPEED_PUSH   = 220; 
 static constexpr uint8_t SPEED_ATTACK = 200; 
 static constexpr uint8_t SPEED_TURN   = 140;
 static constexpr uint8_t SPEED_ROTATE = 160; 
+static constexpr uint8_t SPEED_ESCAPE_FAST = 230;
+static constexpr uint8_t SPEED_ESCAPE_SLOW = 150;
+static constexpr uint16_t LINE_ESCAPE_MS = 240;
+static constexpr uint8_t LINE_DEBOUNCE_COUNT = 2;
 
 
 enum class LastDir : uint8_t { LEFT, RIGHT };
@@ -16,6 +20,23 @@ enum class LastDir : uint8_t { LEFT, RIGHT };
 
 static LastDir g_lastDir = LastDir::RIGHT;
 static uint32_t g_lastSeenMs = 0;
+
+enum class LineEscapeMode : uint8_t { STRAIGHT, CURVE_LEFT, CURVE_RIGHT };
+static LineEscapeMode g_lineEscapeMode = LineEscapeMode::STRAIGHT;
+static uint32_t g_lineEscapeUntilMs = 0;
+static uint8_t g_lineLeftStreak = 0;
+static uint8_t g_lineRightStreak = 0;
+static bool g_lineLeftArmed = true;
+static bool g_lineRightArmed = true;
+
+static inline bool timeNotExpired(uint32_t now, uint32_t deadline) {
+    return static_cast<int32_t>(deadline - now) > 0;
+}
+
+static inline uint8_t nextStreak(uint8_t current, bool detected) {
+    if (!detected) return 0;
+    return (current < LINE_DEBOUNCE_COUNT) ? static_cast<uint8_t>(current + 1) : current;
+}
 
 static inline bool seesFrontCenter(const SensorData& s) {
     return s.frontCenterSensorDistance < MAX_DISTANCE_MM;
@@ -83,12 +104,25 @@ static void attack(Robot& robot, const SensorData& s) {
 
   
     if (front_L && !front_R) {
-        robot.turnMove(SPEED_TURN, SPEED_ATTACK);
+        if (s.frontLeftSensorDistance <= 70){
+            robot.turnLeft(SPEED_ROTATE);
+            
+        }
+        else {
+            robot.turnMove(SPEED_TURN, SPEED_ATTACK);
+        }
+       
         return;
     }
     if (front_R && !front_L) {
-        robot.turnMove(SPEED_ATTACK, SPEED_TURN);
+        if (s.frontRightSensorDistance <= 70){
+            robot.turnRight(SPEED_ROTATE);
+        }
+        else { 
+            robot.turnMove(SPEED_ATTACK, SPEED_TURN);
+        }
         return;
+       
     }
 
    
@@ -107,11 +141,11 @@ static void attack(Robot& robot, const SensorData& s) {
     }
 
    
-    if (side_L && side_R) {
-        if (g_lastDir == LastDir::LEFT) robot.turnLeft(SPEED_ROTATE);
-        else robot.turnRight(SPEED_ROTATE);
-        return;
-    }
+    // if (side_L && side_R) {
+    //     if (g_lastDir == LastDir::LEFT) robot.turnLeft(SPEED_ROTATE);
+    //     else robot.turnRight(SPEED_ROTATE);
+    //     return;
+    // }
 
  
     robot.stop();
@@ -140,6 +174,52 @@ static void search(Robot& robot, uint32_t now) {
     }
 }
 
+static void applyLineEscape(Robot& robot) {
+    switch (g_lineEscapeMode) {
+        case LineEscapeMode::STRAIGHT:
+            robot.moveForward(SPEED_ESCAPE_FAST);
+            break;
+        case LineEscapeMode::CURVE_LEFT:
+            robot.turnMove(SPEED_ESCAPE_SLOW, SPEED_ESCAPE_FAST);
+            break;
+        case LineEscapeMode::CURVE_RIGHT:
+            robot.turnMove(SPEED_ESCAPE_FAST, SPEED_ESCAPE_SLOW);
+            break;
+    }
+}
+
+static bool handleLineEscape(Robot& robot, const SensorData& s, uint32_t now) {
+    g_lineLeftStreak = nextStreak(g_lineLeftStreak, s.lineLeftDetected);
+    g_lineRightStreak = nextStreak(g_lineRightStreak, s.lineRightDetected);
+
+    const bool lineLeftDebounced = g_lineLeftStreak >= LINE_DEBOUNCE_COUNT;
+    const bool lineRightDebounced = g_lineRightStreak >= LINE_DEBOUNCE_COUNT;
+    const bool newLeftTrigger = lineLeftDebounced && g_lineLeftArmed;
+    const bool newRightTrigger = lineRightDebounced && g_lineRightArmed;
+
+    if (newLeftTrigger || newRightTrigger) {
+        if (lineLeftDebounced && lineRightDebounced) {
+            g_lineEscapeMode = LineEscapeMode::STRAIGHT;
+        } else if (lineLeftDebounced) {
+            g_lineEscapeMode = LineEscapeMode::CURVE_RIGHT;
+        } else {
+            g_lineEscapeMode = LineEscapeMode::CURVE_LEFT;
+        }
+        g_lineEscapeUntilMs = now + LINE_ESCAPE_MS;
+    }
+
+    
+    g_lineLeftArmed = !lineLeftDebounced;
+    g_lineRightArmed = !lineRightDebounced;
+
+    if (timeNotExpired(now, g_lineEscapeUntilMs)) {
+        applyLineEscape(robot);
+        return true;
+    }
+
+    return false;
+}
+
 
 // void executeStrategy(Robot& robot, SensorData& sensorData) {
 //     if (sensorData.frontCenterSensorDistance < MAX_DISTANCE_MM) {
@@ -154,13 +234,27 @@ static void search(Robot& robot, uint32_t now) {
 void executeStrategy(Robot& robot, SensorData& sensorData) {
     const uint32_t now = millis();
 
+    // if (handleLineEscape(robot, sensorData, now)) {
+    //     return;
+    // }
+
     updateLastSeen(sensorData, now);
 
     if (seesAny(sensorData)) {
         attack(robot, sensorData);
-    } else {
-        search(robot, now);
+    
+    } 
+   
+    else {
+        search(robot, now);  // if (front_R && !front_L) {
+    //     if (s.frontRightSensorDistance <= 70){
+    //         robot.turnRight(SPEED_ROTATE);
+    //     }
+    //     else { 
+    //         robot.turnMove(SPEED_ATTACK, SPEED_TURN);
+    //     }
+    //     return;
+       
+    // }
     }
 }
-
-
