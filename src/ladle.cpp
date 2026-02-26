@@ -1,44 +1,33 @@
 #include "ladle.h"
 
-Ladle::Ladle(int s1Pin, int s2Pin, int forceSensorPin)
+Ladle::Ladle(int s1Pin, int s2Pin, int fs1Pin, int fs2Pin)
     : servo1Pin(s1Pin),
       servo2Pin(s2Pin),
-      forceSensorPin(forceSensorPin),
+      forceSensor1Pin(fs1Pin),
+      forceSensor2Pin(fs2Pin),
       currentAngle(LADLE_DOWN_ANGLE),
       isLifted(false),
       waitingForCloserDistance(false),
-      forceBufferIndex(0),
-      lastLowerTime(0) {
-    // Ініціалізація буфера
-    for (int i = 0; i < FORCE_FILTER_SIZE; i++) {
-        forceBuffer[i] = 0;
-    }
+      lastLowerTime(0),
+      calibrationCounter(0),
+      sensor2BaseLevel(0),
+      sensor2PrevValue(0),
+      pressureDetected(false),
+      stableCount(0) {
 }
 
 void Ladle::init() {
-    // Підключаємо серво
     servo1.attach(servo1Pin);
     servo2.attach(servo2Pin);
     
-    // Ініціалізуємо датчик сили
-    pinMode(forceSensorPin, INPUT);
+    pinMode(forceSensor1Pin, INPUT);
+    pinMode(forceSensor2Pin, INPUT);
     
-    // Опускаємо ківш на початок
     setAngle(LADLE_DOWN_ANGLE);
     
     Serial.println("\n=== LADLE INIT ===");
-    Serial.println("Режим: автоматичне керування на основі датчиків");
-}
-
-int Ladle::getFilteredForce(int newValue) {
-    forceBuffer[forceBufferIndex] = newValue;
-    forceBufferIndex = (forceBufferIndex + 1) % FORCE_FILTER_SIZE;
-    
-    int sum = 0;
-    for (int i = 0; i < FORCE_FILTER_SIZE; i++) {
-        sum += forceBuffer[i];
-    }
-    return sum / FORCE_FILTER_SIZE;
+    Serial.println("2 датчики тиску: простий (0/20) + аналоговий (калібрування)");
+    Serial.println("Калібрування перших 20 ітерацій...");
 }
 
 void Ladle::setAngle(int angle) {
@@ -49,37 +38,109 @@ void Ladle::setAngle(int angle) {
 
 void Ladle::liftLadle() {
     if (!isLifted) {
-        Serial.println("[LADLE] Підйом на 60°");
+        Serial.println("[LADLE] ПІДЙОМ на 60°");
         setAngle(LADLE_LIFT_ANGLE);
         isLifted = true;
-        waitingForCloserDistance = false;
+        pressureDetected = true;
     }
 }
 
 void Ladle::lowerLadle() {
     if (isLifted) {
-        Serial.println("[LADLE] Опускання");
+        Serial.println("[LADLE] ОПУСКАННЯ");
         setAngle(LADLE_DOWN_ANGLE);
         isLifted = false;
-        waitingForCloserDistance = false;
+        pressureDetected = false;
+        stableCount = 0;
     }
 }
 
-void Ladle::update(uint16_t centerDistance) {
-    // Зчитуємо та фільтруємо датчик сили
-    int rawForce = analogRead(forceSensorPin);
-    int filteredForce = getFilteredForce(rawForce);
+// Детекція різкого скачка та натиску
+bool Ladle::detectSpikeAndPressure(int sensor1Val, int sensor2Val) {
+    // Датчик 1: бінарний - 0=немає тиску, будь-яке значення >0 (до 20-25) = тиск противника
+    if (sensor1Val > SENSOR1_PRESS_THRESHOLD) {
+        Serial.print("[SENSOR1] ТИСК ПРОТИВНИКА! Val=");
+        Serial.println(sensor1Val);
+        return true;
+    }
     
-    // Логування (кожне 50-е значення)
+    // Датчик 2: аналоговий - шукаємо різкий скачок
+    if (calibrationCounter >= CALIBRATION_ITERATIONS) {
+        int delta = sensor2Val - sensor2PrevValue;
+        
+        // Різкий скачок вгору на 100+ одиниць
+        if (delta >= SPIKE_THRESHOLD) {
+            Serial.print("[SENSOR2] РІЗКИЙ СКАЧОК! Було=");
+            Serial.print(sensor2PrevValue);
+            Serial.print(", Стало=");
+            Serial.print(sensor2Val);
+            Serial.print(", Delta=");
+            Serial.println(delta);
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+// Перевірка чи тиск все ще присутній (для датчика 2)
+bool Ladle::isPressureStillPresent(int sensor2Val) {
+    if (calibrationCounter < CALIBRATION_ITERATIONS) {
+        return false; // Ще калібруємось
+    }
+    
+    // Якщо > 450 і тримається стабільно - тіло ще на ковші
+    if (sensor2Val > PRESSURE_HIGH_LEVEL) {
+        Serial.print("[SENSOR2] Високий рівень! Val=");
+        Serial.println(sensor2Val);
+        return true;
+    }
+    
+    // Якщо падає потихеньку (< 5 одиниць) - стабілізація, тиску немає
+    int delta = abs(sensor2Val - sensor2PrevValue);
+    if (delta <= STABILIZATION_DELTA) {
+        stableCount++;
+        if (stableCount > 3) {
+            Serial.println("[SENSOR2] Стабілізація - тиску немає");
+            return false;
+        }
+    } else {
+        stableCount = 0;
+    }
+    
+    return pressureDetected; // Тримаємо попередній стан
+}
+
+void Ladle::update(uint16_t centerDistance) {
+    // Зчитуємо обидва датчики
+    int sensor1 = analogRead(forceSensor1Pin);
+    int sensor2 = analogRead(forceSensor2Pin);
+    
+    // === КАЛІБРУВАННЯ (перші 20 ітерацій) ===
+    if (calibrationCounter < CALIBRATION_ITERATIONS) {
+        sensor2BaseLevel += sensor2;
+        calibrationCounter++;
+        
+        if (calibrationCounter == CALIBRATION_ITERATIONS) {
+            sensor2BaseLevel /= CALIBRATION_ITERATIONS;
+            Serial.print("[КАЛІБРУВАННЯ] Базовий рівень датчика 2: ");
+            Serial.println(sensor2BaseLevel);
+        }
+        
+        sensor2PrevValue = sensor2;
+        return; // Не працюємо під час калібрування
+    }
+    
+    // Логування кожні 50 ітерацій
     static int logCounter = 0;
     if (++logCounter % 50 == 0) {
-        Serial.print("[LADLE] Force=");
-        Serial.print(filteredForce);
-        Serial.print(" | Center=");
+        Serial.print("[LADLE] S1=");
+        Serial.print(sensor1);
+        Serial.print(" | S2=");
+        Serial.print(sensor2);
+        Serial.print(" | Dist=");
         Serial.print(centerDistance);
-        Serial.print("mm | Angle=");
-        Serial.print(currentAngle);
-        Serial.print("° | Lifted=");
+        Serial.print("mm | Lifted=");
         Serial.println(isLifted ? "YES" : "NO");
     }
     
@@ -87,53 +148,39 @@ void Ladle::update(uint16_t centerDistance) {
     // ГОЛОВНА ЛОГІКА
     // ========================================
     
-    // 1. Якщо центральний датчик показує > 3 см - ОПУСКАЄМО
+    // 1. Якщо відстань > 3 см - ОПУСКАЄМО
     if (centerDistance > CENTER_DROP_DISTANCE) {
         if (isLifted) {
-            Serial.println("[LADLE] Центральний > 3см - опускаємо");
+            Serial.println("[LOGIC] Відстань > 3см - опускаємо");
             lowerLadle();
         }
+        sensor2PrevValue = sensor2;
         return;
     }
     
-    // 2. Датчик сили спрацював
-    if (filteredForce > FORCE_THRESHOLD) {
-        // Особливий випадок: якщо центральний датчик > 2 см
-        if (centerDistance > MIDDLE_WAIT_DISTANCE) {
-            // Чекаємо поки центральний датчик не покаже 0.5 см
-            if (!waitingForCloserDistance) {
-                Serial.println("[LADLE] Сила спрацювала, але центральний > 2см - очікування");
-                waitingForCloserDistance = true;
-            }
-            
-            // Перевіряємо чи центральний датчик показує вже 0.5 см
-            if (centerDistance <= MIDDLE_LIFT_DISTANCE) {
-                Serial.println("[LADLE] Центральний <= 0.5см - ПІДЙОМ");
+    // 2. Якщо датчики "фонять", перевіряємо відстань
+    // Якщо відстань > 3 см - ігноруємо датчики тиску
+    
+    // 3. Детекція натиску (різкий скачок або простий датчик)
+    if (!isLifted) {
+        if (detectSpikeAndPressure(sensor1, sensor2)) {
+            // Перевіряємо відстань перед підйомом
+            if (centerDistance <= CENTER_DROP_DISTANCE) {
+                Serial.println("[LOGIC] НАТИСК ЗАСІЧЕНО + Відстань OK - ПІДЙОМ!");
                 liftLadle();
+            } else {
+                Serial.println("[LOGIC] Натиск є, але відстань > 3см - ігноруємо (фон)");
             }
-            return;
         }
-        
-        // Звичайний випадок - просто піднімаємо
-        if (!isLifted) {
-            Serial.println("[LADLE] Датчик сили спрацював - ПІДЙОМ");
-            liftLadle();
-        }
-        return;
     }
     
-    // 3. Центральний датчик показує 0.5 см або менше
-    if (centerDistance <= MIDDLE_LIFT_DISTANCE) {
-        if (!isLifted) {
-            Serial.println("[LADLE] Центральний <= 0.5см - ПІДЙОМ");
-            liftLadle();
+    // 4. Якщо підняли - тримаємо поки тиск є
+    if (isLifted) {
+        if (!isPressureStillPresent(sensor2)) {
+            Serial.println("[LOGIC] Тиск зник - можна опускати при відстані > 3см");
+            // Опускаємо тільки якщо відстань > 3см (пункт 1)
         }
-        return;
     }
     
-    // 4. Якщо чекали на зближення, але сила вже не спрацьовує
-    if (waitingForCloserDistance && filteredForce <= FORCE_THRESHOLD) {
-        Serial.println("[LADLE] Очікування скасовано (сила зникла)");
-        waitingForCloserDistance = false;
-    }
+    sensor2PrevValue = sensor2;
 }

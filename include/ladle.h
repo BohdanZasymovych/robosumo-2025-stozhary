@@ -12,25 +12,30 @@ private:
     int servo1Pin;
     int servo2Pin;
 
-    // Датчик тиску/сили
-    int forceSensorPin;
+    // Датчики тиску/сили
+    int forceSensor1Pin;  // Простий датчик: 0/20
+    int forceSensor2Pin;  // Аналоговий з калібруванням
     
     // Параметри ківша
-    const int LADLE_LIFT_ANGLE = 60;        // Кут підйому
-    const int LADLE_DOWN_ANGLE = 0;         // Кут опускання
-    const int FORCE_THRESHOLD = 200;         // Поріг датчика сили (ADC)
+    const int LADLE_LIFT_ANGLE = 60;
+    const int LADLE_DOWN_ANGLE = 0;
+    const int CENTER_DROP_DISTANCE = 30;  // 3 см
     
-    const int CENTER_DROP_DISTANCE = 30;     // 3 см - відстань для опускання
-    const int MIDDLE_LIFT_DISTANCE = 5;      // 0.5 см - відстань для підйому
-    const int MIDDLE_WAIT_DISTANCE = 20;     // 2 см - відстань для очікування
+    // Параметри датчика 1 (бінарний: 0=немає, >0=натиск)
+    const int SENSOR1_PRESS_THRESHOLD = 2;  // > 2 = натиск (макс 20-25)
     
-    const int LOWER_STEP = 5;                // Крок опускання в градусах
-    const int LOWER_DELAY = 100;             // Затримка між кроками (мс)
+    // Параметри датчика 2 (аналоговий)
+    const int CALIBRATION_ITERATIONS = 20;   // Перші 20 ітерацій для калібрування
+    const int SPIKE_THRESHOLD = 100;         // Різкий скачок +100
+    const int PRESSURE_HIGH_LEVEL = 450;     // > 450 = тіло на ковші
+    const int STABILIZATION_DELTA = 5;       // Падіння < 5 = стабілізація
     
-    // Фільтр для датчика сили
-    static const int FORCE_FILTER_SIZE = 5;
-    int forceBuffer[FORCE_FILTER_SIZE];
-    int forceBufferIndex;
+    // Калібрування і стан
+    int calibrationCounter;
+    int sensor2BaseLevel;          // Базовий рівень 0 для датчика 2
+    int sensor2PrevValue;          // Попереднє значення
+    bool pressureDetected;         // Чи засічено натиск
+    int stableCount;               // Лічильник стабільних значень
     
     // Стан ківша
     int currentAngle;
@@ -39,14 +44,15 @@ private:
     unsigned long lastLowerTime;
     
     // Приватні методи
-    int getFilteredForce(int newValue);
     void setAngle(int angle);
     void liftLadle();
     void lowerLadle();
+    bool detectSpikeAndPressure(int sensor1Val, int sensor2Val);
+    bool isPressureStillPresent(int sensor2Val);
     
 public:
     // Конструктор
-    Ladle(int s1Pin, int s2Pin, int forceSensorPin);
+    Ladle(int s1Pin, int s2Pin, int fs1Pin, int fs2Pin);
     
     // Ініціалізація
     void init();

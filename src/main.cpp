@@ -13,7 +13,7 @@ Robot robot(motorLeft, motorRight, 255);
 FrontSensorArray frontSensorArray;
 SensorData sensorData;
 
-Ladle ladle(LADLE_SERVO1_PIN, LADLE_SERVO2_PIN, FORCE_SENSOR_PIN);
+Ladle ladle(LADLE_SERVO1_PIN, LADLE_SERVO2_PIN, FORCE_SENSOR1_PIN, FORCE_SENSOR2_PIN);
 
 void setup() {
     delay(5000);
