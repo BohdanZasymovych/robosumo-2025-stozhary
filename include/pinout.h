@@ -70,4 +70,16 @@
 // ========================================
 
 
+// ========================================
+// LADLE (КІВШ)
+// ========================================
+
+// Servo Motors
+#define LADLE_SERVO1_PIN 18
+#define LADLE_SERVO2_PIN 19
+
+// Force Sensor (датчик сили/тиску)
+#define FORCE_SENSOR_PIN 34
+
+
 #endif // PINOUT_H

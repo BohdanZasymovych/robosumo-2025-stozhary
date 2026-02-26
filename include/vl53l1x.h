@@ -3,6 +3,7 @@
 
 
 #include <VL53L1X.h>
+#include <Wire.h>
 #include <atomic>
 
 
