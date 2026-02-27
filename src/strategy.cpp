@@ -13,10 +13,6 @@ static constexpr uint8_t SPEED_ROTATE = 200;
 static constexpr uint8_t SPEED_ESCAPE_FAST = 255;
 static constexpr uint8_t SPEED_ESCAPE_SLOW = 150;
 
-// static constexpr uint16_t SEARCH_CYCLE_MS = 3500;
-// static constexpr uint16_t SEARCH_TURN_DURATION_MS = 1500;
-// static constexpr uint8_t  SPEED_SEARCH_FORWARD = 150;
-
 static constexpr uint16_t LINE_ESCAPE_MS = 240;
 static constexpr uint8_t LINE_DEBOUNCE_COUNT = 2;
 
@@ -151,16 +147,6 @@ static void search(Robot& robot, uint32_t now) {
     }
     
     robot.turnRight(SPEED_ROTATE);
- 
-    // const uint32_t t = now % SEARCH_CYCLE_MS;
-
-    // if (t < SEARCH_TURN_DURATION_MS) {
-    //     robot.turnRight(SPEED_ROTATE);
-    // } else {
-    //     robot.turnLeft(SPEED_ROTATE);
-    // } // else {
-    //     robot.moveForward(150); 
-    // }
 }
 
 static void applyLineEscape(Robot& robot) {
