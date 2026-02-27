@@ -12,8 +12,9 @@ Ladle::Ladle(int s1Pin, int s2Pin, int fs1Pin, int fs2Pin)
 }
 
 void Ladle::init() {
-    servo1.attach(servo1Pin);
-    servo2.attach(servo2Pin);
+    // Явно вказуємо PWM канали 4 і 5 (0-3 зайняті моторами)
+    servo1.attach(servo1Pin, 1000, 2000, SERVO1_PWM_CHANNEL);
+    servo2.attach(servo2Pin, 1000, 2000, SERVO2_PWM_CHANNEL);
     
     pinMode(forceSensor1Pin, INPUT);
     pinMode(forceSensor2Pin, INPUT);

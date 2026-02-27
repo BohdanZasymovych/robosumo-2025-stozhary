@@ -11,6 +11,10 @@ private:
     Servo servo2;
     int servo1Pin;
     int servo2Pin;
+    
+    // PWM канали для серваків (канали 0-3 зайняті моторами)
+    const int SERVO1_PWM_CHANNEL = 4;
+    const int SERVO2_PWM_CHANNEL = 5;
 
     // Датчики тиску/сили
     int forceSensor1Pin;  // Верхній: старт 0-100, натиск >= 170
