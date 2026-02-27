@@ -90,4 +90,19 @@
 
 #define WIFI_SSID "UCU_Guest"
 #define WIFI_PASS ""
+
+// ========================================
+// LADLE
+// ========================================
+
+// Servo Motors
+#define LADLE_SERVO1_PIN 20
+#define LADLE_SERVO2_PIN 21
+
+// Force Sensors (датчики сили/тиску)
+#define FORCE_SENSOR1_PIN 48  // Верхній: старт 0-100, натиск >= 170
+#define FORCE_SENSOR2_PIN 47  // Нижній: 0=немає, натиск >= 60
+
 #endif // PINOUT_H
+
+
