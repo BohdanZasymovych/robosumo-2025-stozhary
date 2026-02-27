@@ -2,7 +2,7 @@
 #include <Arduino.h>
 
 
-uint8_t Motor::nextPWMChannel = 0; // Set starting PWM channel
+uint8_t Motor::nextPWMChannel = 2; // Починаємо з 2 (канали 0-1 для серваків)
 
 Motor::Motor(uint8_t forwardPWMPin, uint8_t backwardPWMPin) :
     forwardPWMPin(forwardPWMPin),

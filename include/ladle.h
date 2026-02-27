@@ -6,15 +6,11 @@
 
 class Ladle {
 private:
-    // Сервомотори
+    // Сервомотори (автоматично використовують PWM канали 0-1)
     Servo servo1;
     Servo servo2;
-    int servo1Pin;
-    int servo2Pin;
-    
-    // PWM канали для серваків (канали 0-3 зайняті моторами)
-    const int SERVO1_PWM_CHANNEL = 4;
-    const int SERVO2_PWM_CHANNEL = 5;
+    const uint8_t servo1Pin;
+    const uint8_t servo2Pin;
 
     // Датчики тиску/сили
     int forceSensor1Pin;  // Верхній: старт 0-100, натиск >= 170

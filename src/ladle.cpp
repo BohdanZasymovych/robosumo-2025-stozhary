@@ -7,14 +7,14 @@ Ladle::Ladle(int s1Pin, int s2Pin, int fs1Pin, int fs2Pin)
       forceSensor2Pin(fs2Pin),
       currentAngle(LADLE_DOWN_ANGLE),
       isLifted(false),
-    waitingForCloserDistance(false),
-    lastLowerTime(0) {
+      waitingForCloserDistance(false),
+      lastLowerTime(0) {
 }
 
 void Ladle::init() {
-    // Явно вказуємо PWM канали 4 і 5 (0-3 зайняті моторами)
-    servo1.attach(servo1Pin, 1000, 2000, SERVO1_PWM_CHANNEL);
-    servo2.attach(servo2Pin, 1000, 2000, SERVO2_PWM_CHANNEL);
+    // ESP32Servo автоматично обере PWM канали 0-1 (мотори на 2-5)
+    servo1.attach(servo1Pin);
+    servo2.attach(servo2Pin);
     
     pinMode(forceSensor1Pin, INPUT);
     pinMode(forceSensor2Pin, INPUT);
@@ -22,6 +22,7 @@ void Ladle::init() {
     setAngle(LADLE_DOWN_ANGLE);
     
     Serial.println("\n=== LADLE INIT ===");
+    Serial.println("Серваки: PWM канали 0-1 (авто)");
     Serial.println("2 датчики тиску: верхній >=170, нижній >=60");
 }
 
