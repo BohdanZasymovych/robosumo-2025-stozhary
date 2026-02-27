@@ -84,6 +84,23 @@ void Ladle::update(uint16_t centerDistance) {
     }
     
     // ========================================
+    // ДЕТЕКЦІЯ РІЗКОЇ ЗМІНИ ВІДСТАНІ
+    // ========================================
+    // delta = поточне - наступне
+    // Якщо від'ємна (противник віддаляється): опускаємо ківш
+    // Якщо додатна (противник приближується): ігноримо
+    int distanceDelta = prevDistance - centerDistance;  // поточне (prev) - наступне (current)
+    
+    if (isLifted && distanceDelta < -DISTANCE_DELTA_DROP_THRESHOLD) {
+        Serial.print("[DISTANCE] РІЗКА ЗМІНА! Delta=");
+        Serial.print(distanceDelta);
+        Serial.println(" - ПРОТИВНИК ВІДДАЛИВСЯ - ОПУСКАЄМО!");
+        lowerLadle();
+    }
+    
+    prevDistance = centerDistance;  // Зберігаємо для наступної ітерації
+    
+    // ========================================
     // ГОЛОВНА ЛОГІКА
     // ========================================
     
