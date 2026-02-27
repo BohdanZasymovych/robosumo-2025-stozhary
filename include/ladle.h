@@ -18,7 +18,7 @@ private:
     
     // Параметри ківша
     const int LADLE_LIFT_ANGLE = 60;
-    const int LADLE_DOWN_ANGLE = 20;  // Дно ківша на 20° (замість 0°)
+    const int LADLE_DOWN_ANGLE = 10;  // Дно ківша на 20° (замість 0°)
     const int CENTER_DROP_DISTANCE = 30;  // 3 см
     const int DISTANCE_DELTA_DROP_THRESHOLD = 50;  // Опускаємо при різкій змині > 50мм
     

@@ -9,7 +9,7 @@ static constexpr uint16_t MEMORY_MS = 3000u;
 static constexpr uint8_t SPEED_PUSH   = 255; 
 static constexpr uint8_t SPEED_ATTACK = 255; 
 static constexpr uint8_t SPEED_TURN   = 200;
-static constexpr uint8_t SPEED_ROTATE = 200;
+static constexpr uint8_t SPEED_ROTATE = 175;
 static constexpr uint8_t SPEED_ESCAPE_FAST = 255;
 static constexpr uint8_t SPEED_ESCAPE_SLOW = 150;
 

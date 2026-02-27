@@ -3,7 +3,7 @@
 
 
 Linesensor::Linesensor(uint8_t pin) : pin(pin) {
-        Serial.begin(115200);
+        // Serial.begin(115200);
         pinMode(pin, INPUT);
 }
 
