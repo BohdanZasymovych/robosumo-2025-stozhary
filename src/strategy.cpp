@@ -17,30 +17,30 @@ static constexpr uint8_t SPEED_ESCAPE_SLOW = 150;
 // static constexpr uint16_t SEARCH_TURN_DURATION_MS = 1500;
 // static constexpr uint8_t  SPEED_SEARCH_FORWARD = 150;
 
-static constexpr uint16_t LINE_ESCAPE_MS = 240;
-static constexpr uint8_t LINE_DEBOUNCE_COUNT = 2;
+// static constexpr uint16_t LINE_ESCAPE_MS = 240;
+// static constexpr uint8_t LINE_DEBOUNCE_COUNT = 2;
 
 enum class LastDir : uint8_t { LEFT, RIGHT };
 
 static LastDir g_lastDir = LastDir::RIGHT;
 static uint32_t g_lastSeenMs = 0;
 
-enum class LineEscapeMode : uint8_t { STRAIGHT, CURVE_LEFT, CURVE_RIGHT };
-static LineEscapeMode g_lineEscapeMode = LineEscapeMode::STRAIGHT;
-static uint32_t g_lineEscapeUntilMs = 0;
-static uint8_t g_lineLeftStreak = 0;
-static uint8_t g_lineRightStreak = 0;
-static bool g_lineLeftArmed = true;
-static bool g_lineRightArmed = true;
+// enum class LineEscapeMode : uint8_t { STRAIGHT, CURVE_LEFT, CURVE_RIGHT };
+// static LineEscapeMode g_lineEscapeMode = LineEscapeMode::STRAIGHT;
+// static uint32_t g_lineEscapeUntilMs = 0;
+// static uint8_t g_lineLeftStreak = 0;
+// static uint8_t g_lineRightStreak = 0;
+// static bool g_lineLeftArmed = true;
+// static bool g_lineRightArmed = true;
 
-static inline bool timeNotExpired(uint32_t now, uint32_t deadline) {
-    return static_cast<int32_t>(deadline - now) > 0;
-}
+// static inline bool timeNotExpired(uint32_t now, uint32_t deadline) {
+//     return static_cast<int32_t>(deadline - now) > 0;
+// }
 
-static inline uint8_t nextStreak(uint8_t current, bool detected) {
-    if (!detected) return 0;
-    return (current < LINE_DEBOUNCE_COUNT) ? static_cast<uint8_t>(current + 1) : current;
-}
+// static inline uint8_t nextStreak(uint8_t current, bool detected) {
+//     if (!detected) return 0;
+//     return (current < LINE_DEBOUNCE_COUNT) ? static_cast<uint8_t>(current + 1) : current;
+// }
 
 struct SensorState {
     bool frontCenter;
@@ -163,58 +163,58 @@ static void search(Robot& robot, uint32_t now) {
     // }
 }
 
-static void applyLineEscape(Robot& robot) {
-    switch (g_lineEscapeMode) {
-        case LineEscapeMode::STRAIGHT:
-            robot.moveForward(SPEED_ESCAPE_FAST);
-            break;
-        case LineEscapeMode::CURVE_LEFT:
-            robot.turnMove(SPEED_ESCAPE_SLOW, SPEED_ESCAPE_FAST);
-            break;
-        case LineEscapeMode::CURVE_RIGHT:
-            robot.turnMove(SPEED_ESCAPE_FAST, SPEED_ESCAPE_SLOW);
-            break;
-    }
-}
+// static void applyLineEscape(Robot& robot) {
+//     switch (g_lineEscapeMode) {
+//         case LineEscapeMode::STRAIGHT:
+//             robot.moveForward(SPEED_ESCAPE_FAST);
+//             break;
+//         case LineEscapeMode::CURVE_LEFT:
+//             robot.turnMove(SPEED_ESCAPE_SLOW, SPEED_ESCAPE_FAST);
+//             break;
+//         case LineEscapeMode::CURVE_RIGHT:
+//             robot.turnMove(SPEED_ESCAPE_FAST, SPEED_ESCAPE_SLOW);
+//             break;
+//     }
+// }
 
-static bool handleLineEscape(Robot& robot, const SensorData& s, uint32_t now) {
-    g_lineLeftStreak = nextStreak(g_lineLeftStreak, s.lineLeftDetected);
-    g_lineRightStreak = nextStreak(g_lineRightStreak, s.lineRightDetected);
+// static bool handleLineEscape(Robot& robot, const SensorData& s, uint32_t now) {
+//     g_lineLeftStreak = nextStreak(g_lineLeftStreak, s.lineLeftDetected);
+//     g_lineRightStreak = nextStreak(g_lineRightStreak, s.lineRightDetected);
 
-    const bool lineLeftDebounced = g_lineLeftStreak >= LINE_DEBOUNCE_COUNT;
-    const bool lineRightDebounced = g_lineRightStreak >= LINE_DEBOUNCE_COUNT;
-    const bool newLeftTrigger = lineLeftDebounced && g_lineLeftArmed;
-    const bool newRightTrigger = lineRightDebounced && g_lineRightArmed;
+//     const bool lineLeftDebounced = g_lineLeftStreak >= LINE_DEBOUNCE_COUNT;
+//     const bool lineRightDebounced = g_lineRightStreak >= LINE_DEBOUNCE_COUNT;
+//     const bool newLeftTrigger = lineLeftDebounced && g_lineLeftArmed;
+//     const bool newRightTrigger = lineRightDebounced && g_lineRightArmed;
 
-    if (newLeftTrigger || newRightTrigger) {
-        if (lineLeftDebounced && lineRightDebounced) {
-            g_lineEscapeMode = LineEscapeMode::STRAIGHT;
-        } else if (lineLeftDebounced) {
-            g_lineEscapeMode = LineEscapeMode::CURVE_RIGHT;
-        } else {
-            g_lineEscapeMode = LineEscapeMode::CURVE_LEFT;
-        }
-        g_lineEscapeUntilMs = now + LINE_ESCAPE_MS;
-    }
+//     if (newLeftTrigger || newRightTrigger) {
+//         if (lineLeftDebounced && lineRightDebounced) {
+//             g_lineEscapeMode = LineEscapeMode::STRAIGHT;
+//         } else if (lineLeftDebounced) {
+//             g_lineEscapeMode = LineEscapeMode::CURVE_RIGHT;
+//         } else {
+//             g_lineEscapeMode = LineEscapeMode::CURVE_LEFT;
+//         }
+//         g_lineEscapeUntilMs = now + LINE_ESCAPE_MS;
+//     }
     
-    g_lineLeftArmed = !lineLeftDebounced;
-    g_lineRightArmed = !lineRightDebounced;
+//     g_lineLeftArmed = !lineLeftDebounced;
+//     g_lineRightArmed = !lineRightDebounced;
 
-    if (timeNotExpired(now, g_lineEscapeUntilMs)) {
-        applyLineEscape(robot);
-        return true;
-    }
+//     if (timeNotExpired(now, g_lineEscapeUntilMs)) {
+//         applyLineEscape(robot);
+//         return true;
+//     }
 
-    return false;
-}
+//     return false;
+// }
 
 
 void executeStrategy(Robot& robot, SensorData& sensorData) {
     const uint32_t now = millis();
 
-    if (handleLineEscape(robot, sensorData, now)) {
-        return;
-    }
+    // if (handleLineEscape(robot, sensorData, now)) {
+    //     return;
+    // }
 
     SensorState state = getSensorState(sensorData);
 
