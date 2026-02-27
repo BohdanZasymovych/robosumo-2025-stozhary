@@ -96,8 +96,8 @@
 // ========================================
 
 // Servo Motors
-#define LADLE_SERVO1_PIN 21
-#define LADLE_SERVO2_PIN 20
+#define LADLE_SERVO1_PIN 20
+#define LADLE_SERVO2_PIN 21
 
 // Force Sensors (датчики сили/тиску)
 #define FORCE_SENSOR1_PIN 48  // Верхній: старт 0-100, натиск >= 170
