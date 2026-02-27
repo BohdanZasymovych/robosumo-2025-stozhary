@@ -18,7 +18,7 @@ private:
     
     // Параметри ківша
     const int LADLE_LIFT_ANGLE = 60;
-    const int LADLE_DOWN_ANGLE = 0;
+    const int LADLE_DOWN_ANGLE = 20;  // Дно ківша на 20° (замість 0°)
     const int CENTER_DROP_DISTANCE = 30;  // 3 см
     
     // Пороги тиску
