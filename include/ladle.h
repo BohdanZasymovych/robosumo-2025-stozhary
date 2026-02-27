@@ -13,34 +13,22 @@ private:
     int servo2Pin;
 
     // Датчики тиску/сили
-    int forceSensor1Pin;  // Простий датчик: 0/20
-    int forceSensor2Pin;  // Аналоговий з калібруванням
+    int forceSensor1Pin;  // Верхній: старт 0-100, натиск >= 170
+    int forceSensor2Pin;  // Нижній: 0=немає, натиск >= 60
     
     // Параметри ківша
     const int LADLE_LIFT_ANGLE = 60;
     const int LADLE_DOWN_ANGLE = 0;
     const int CENTER_DROP_DISTANCE = 30;  // 3 см
     
-    // Параметри датчика 1 (бінарний: 0=немає, >0=натиск)
-    const int SENSOR1_PRESS_THRESHOLD = 2;  // > 2 = натиск (макс 20-25)
-    
-    // Параметри датчика 2 (аналоговий)
-    const int CALIBRATION_ITERATIONS = 20;   // Перші 20 ітерацій для калібрування
-    const int SPIKE_THRESHOLD = 100;         // Різкий скачок +100
-    const int PRESSURE_HIGH_LEVEL = 450;     // > 450 = тіло на ковші
-    const int STABILIZATION_DELTA = 5;       // Падіння < 5 = стабілізація
-    
-    // Калібрування і стан
-    int calibrationCounter;
-    int sensor2BaseLevel;          // Базовий рівень 0 для датчика 2
-    int sensor2PrevValue;          // Попереднє значення
-    bool pressureDetected;         // Чи засічено натиск
-    int stableCount;               // Лічильник стабільних значень
+    // Пороги тиску
+    const int SENSOR1_PRESS_THRESHOLD = 170; // Верхній: натиск >= 170
+    const int SENSOR2_PRESS_THRESHOLD = 60;  // Нижній: натиск >= 60
     
     // Стан ківша
     int currentAngle;
     bool isLifted;
-    bool waitingForCloserDistance;           // Чекаємо поки центральний датчик покаже 0.5см
+    bool waitingForCloserDistance;
     unsigned long lastLowerTime;
     
     // Приватні методи
@@ -48,7 +36,6 @@ private:
     void liftLadle();
     void lowerLadle();
     bool detectSpikeAndPressure(int sensor1Val, int sensor2Val);
-    bool isPressureStillPresent(int sensor2Val);
     
 public:
     // Конструктор
