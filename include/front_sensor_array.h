@@ -18,6 +18,7 @@ private:
     static void IRAM_ATTR centerISR();
     static void IRAM_ATTR rightISR();
     void attachInterrupts();
+    void recoverBus();
 
 public:
     FrontSensorArray();

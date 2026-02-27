@@ -69,5 +69,21 @@
 // LINE SENSORS
 // ========================================
 
+#define LINE_SENSOR_LEFT 42
+#define LINE_SENSOR_RIGHT 4
+
+
+// ========================================
+// LADLE
+// ========================================
+
+// Servo Motors
+#define LADLE_SERVO1_PIN 20
+#define LADLE_SERVO2_PIN 21
+
+// Force Sensors
+#define FORCE_SENSOR1_PIN 48
+#define FORCE_SENSOR2_PIN 47
+
 
 #endif // PINOUT_H
