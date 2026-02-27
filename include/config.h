@@ -100,8 +100,8 @@
 #define LADLE_SERVO2_PIN 21
 
 // Force Sensors (датчики сили/тиску)
-#define FORCE_SENSOR1_PIN 48  // Верхній: старт 0-100, натиск >= 170
-#define FORCE_SENSOR2_PIN 47  // Нижній: 0=немає, натиск >= 60
+#define FORCE_SENSOR1_PIN 48
+#define FORCE_SENSOR2_PIN 47
 
 #endif // PINOUT_H
 

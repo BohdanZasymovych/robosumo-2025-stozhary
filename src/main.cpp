@@ -26,7 +26,7 @@ Ladle ladle(LADLE_SERVO1_PIN, LADLE_SERVO2_PIN, FORCE_SENSOR1_PIN, FORCE_SENSOR2
 void setup() {
     unsigned long startTime = millis();
 
-    // Serial.begin(115200);
+    Serial.begin(115200);
 
     frontSensorArray.begin();
     ladle.init();
@@ -46,16 +46,15 @@ void loop() {
     sensorData.lineLeftDetected = lineLeft.isLineDetected();;
     sensorData.lineRightDetected = lineRight.isLineDetected();;
 
-    // Serial.printf("Front Left: %d ", sensorData.frontLeftSensorDistance);
-    // Serial.printf("Front Center: %d ", sensorData.frontCenterSensorDistance);
-    // Serial.printf("Front Right: %d ", sensorData.frontRightSensorDistance);
-    // Serial.printf("Side Left: %d ", sensorData.sideLeftSensorDistance);
-    // Serial.printf("Side Right: %d ", sensorData.sideRightSensorDistance);
-    // Serial.printf("Line Left: %d ", sensorData.lineLeftDetected);
-    // Serial.printf("Line Right: %d ", sensorData.lineRightDetected);
-    // Serial.print("\n");
+    Serial.printf("Front Left: %d ", sensorData.frontLeftSensorDistance);
+    Serial.printf("Front Center: %d ", sensorData.frontCenterSensorDistance);
+    Serial.printf("Front Right: %d ", sensorData.frontRightSensorDistance);
+    Serial.printf("Side Left: %d ", sensorData.sideLeftSensorDistance);
+    Serial.printf("Side Right: %d ", sensorData.sideRightSensorDistance);
+    Serial.printf("Line Left: %d ", sensorData.lineLeftDetected);
+    Serial.printf("Line Right: %d ", sensorData.lineRightDetected);
+    Serial.print("\n");
 
-    // Оновлення ківша (використовується лише центральний датчик)
     ladle.update(sensorData.frontCenterSensorDistance);
     
     executeStrategy(robot, sensorData);

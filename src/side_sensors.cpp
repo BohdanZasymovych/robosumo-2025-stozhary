@@ -45,7 +45,52 @@ void IRAM_ATTR SideSensors::rightISR() {
     }
 }
 
+void SideSensors::recoverBus() {
+    ::detachInterrupt(digitalPinToInterrupt(m_leftSensor.getIntPin()));
+    ::detachInterrupt(digitalPinToInterrupt(m_rightSensor.getIntPin()));
+
+    Wire1.end();
+    
+    pinMode(I2C_WIRE1_SDA, INPUT_PULLUP);
+    pinMode(I2C_WIRE1_SCL, INPUT_PULLUP);
+    delay(1);
+
+    if (digitalRead(I2C_WIRE1_SDA) == LOW) {
+        for (int i = 0; i < 9; i++) {
+            pinMode(I2C_WIRE1_SCL, OUTPUT);
+            digitalWrite(I2C_WIRE1_SCL, LOW);
+            delayMicroseconds(5);
+            
+            pinMode(I2C_WIRE1_SCL, INPUT_PULLUP); 
+            delayMicroseconds(5);
+            
+            if (digitalRead(I2C_WIRE1_SDA) == HIGH) {
+                break;
+            }
+        }
+    }
+
+    pinMode(I2C_WIRE1_SDA, OUTPUT);
+    digitalWrite(I2C_WIRE1_SDA, LOW);
+    delayMicroseconds(5);
+    pinMode(I2C_WIRE1_SCL, INPUT_PULLUP); 
+    delayMicroseconds(5);
+    pinMode(I2C_WIRE1_SDA, INPUT_PULLUP); 
+    delay(1);
+
+    begin();
+}
+
 void SideSensors::updateData(uint16_t& leftSensorPlaceToWrite, uint16_t& rightSensorPlaceToWrite) {
+    if (digitalRead(I2C_WIRE1_SDA) == LOW) {
+        static uint32_t lastRecoveryTime = 0;
+        if (millis() - lastRecoveryTime > 500) { 
+            recoverBus();
+            lastRecoveryTime = millis();
+        }
+        return;
+    }
+
     m_leftSensor.updateData(leftSensorPlaceToWrite);
     m_rightSensor.updateData(rightSensorPlaceToWrite);
 }

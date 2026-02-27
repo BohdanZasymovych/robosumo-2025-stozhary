@@ -15,6 +15,7 @@ private:
     static void IRAM_ATTR leftISR();
     static void IRAM_ATTR rightISR();
     void attachInterrupts();
+    void recoverBus();
 
 public:
     SideSensors();

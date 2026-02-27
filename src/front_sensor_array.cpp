@@ -2,7 +2,6 @@
 #include "front_sensor_array.h"
 #include <Wire.h>
 
-
 FrontSensorArray* FrontSensorArray::s_instance = nullptr;
 
 FrontSensorArray::FrontSensorArray() 
@@ -13,6 +12,8 @@ FrontSensorArray::FrontSensorArray()
 bool FrontSensorArray::begin() {
     Wire.begin(I2C_WIRE_SDA, I2C_WIRE_SCL);
     Wire.setClock(I2C_WIRE_CLOCK_FREQ);
+    
+    Wire.setTimeOut(10); 
 
     m_leftSensor.initHardware();
     m_centerSensor.initHardware();
@@ -56,7 +57,53 @@ void IRAM_ATTR FrontSensorArray::rightISR() {
     }
 }
 
+void FrontSensorArray::recoverBus() {
+    ::detachInterrupt(digitalPinToInterrupt(m_leftSensor.getIntPin()));
+    ::detachInterrupt(digitalPinToInterrupt(m_centerSensor.getIntPin()));
+    ::detachInterrupt(digitalPinToInterrupt(m_rightSensor.getIntPin()));
+
+    Wire.end();
+    
+    pinMode(I2C_WIRE_SDA, INPUT_PULLUP);
+    pinMode(I2C_WIRE_SCL, INPUT_PULLUP);
+    delay(1);
+
+    if (digitalRead(I2C_WIRE_SDA) == LOW) {
+        for (int i = 0; i < 9; i++) {
+            pinMode(I2C_WIRE_SCL, OUTPUT);
+            digitalWrite(I2C_WIRE_SCL, LOW);
+            delayMicroseconds(5);
+            
+            pinMode(I2C_WIRE_SCL, INPUT_PULLUP); 
+            delayMicroseconds(5);
+            
+            if (digitalRead(I2C_WIRE_SDA) == HIGH) {
+                break;
+            }
+        }
+    }
+
+    pinMode(I2C_WIRE_SDA, OUTPUT);
+    digitalWrite(I2C_WIRE_SDA, LOW);
+    delayMicroseconds(5);
+    pinMode(I2C_WIRE_SCL, INPUT_PULLUP); 
+    delayMicroseconds(5);
+    pinMode(I2C_WIRE_SDA, INPUT_PULLUP); 
+    delay(1);
+
+    begin();
+}
+
 void FrontSensorArray::updateData(uint16_t& leftSensorPlaceToWrite, uint16_t& centerSensorPlaceToWrite, uint16_t& rightSensorPlaceToWrite) {
+    if (digitalRead(I2C_WIRE_SDA) == LOW) {
+        static uint32_t lastRecoveryTime = 0;
+        if (millis() - lastRecoveryTime > 500) { 
+            recoverBus();
+            lastRecoveryTime = millis();
+        }
+        return;
+    }
+
     m_leftSensor.updateData(leftSensorPlaceToWrite);
     m_centerSensor.updateData(centerSensorPlaceToWrite);
     m_rightSensor.updateData(rightSensorPlaceToWrite);
