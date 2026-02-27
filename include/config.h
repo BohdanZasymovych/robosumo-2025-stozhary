@@ -33,17 +33,17 @@
 // ========================================
 // VL53L0X SENSORS SETTINGS 
 // ========================================
-#define VL53L0X_SIGNAL_RATE_LIMIT 0.25
-#define VL53L0X_VCSEL_PULSE_PERIOD_PRE 14u
-#define VL53L0X_VCSEL_PULSE_PERIOD_FINAL 10u
-#define VL53L0X_MEASUREMENT_TIMING_BUDGET 20000u
+#define VL53L0X_SIGNAL_RATE_LIMIT 0.15
+#define VL53L0X_VCSEL_PULSE_PERIOD_PRE 18u
+#define VL53L0X_VCSEL_PULSE_PERIOD_FINAL 14u
+#define VL53L0X_MEASUREMENT_TIMING_BUDGET 45000u
 
 
 // ========================================
-// VL53L1X SENSORS SETTINGS 
+// VL53L1X SENSORS SETTINGS
 // ========================================
-#define VL53L1X_SENSOR_DISTANCE_MODE VL53L1X::DistanceMode::Short
-#define VL53L1X_TIMING_BUDGET 20000u
+#define VL53L1X_SENSOR_DISTANCE_MODE VL53L1X::DistanceMode::Long
+#define VL53L1X_TIMING_BUDGET 52000u
 
 
 // ========================================

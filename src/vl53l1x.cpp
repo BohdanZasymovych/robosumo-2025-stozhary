@@ -40,7 +40,7 @@ void SensorVL53L1X::updateData(uint16_t& placeToWrite) {
     // Serial.printf("range_mm: %d, range_status: %d, peak_signal_count_rate_MCPS: %f, ambient_count_rate_MCPS: %f\n", m_sensor.ranging_data.range_mm, m_sensor.ranging_data.range_status, m_sensor.ranging_data.peak_signal_count_rate_MCPS, m_sensor.ranging_data.ambient_count_rate_MCPS);
     if (m_dataReadyFlag.exchange(false, std::memory_order_acquire)) {
         m_sensor.read(false);
-        placeToWrite = (m_sensor.ranging_data.range_status != 0) ? UINT16_MAX : m_sensor.ranging_data.range_mm;
+        placeToWrite = (m_sensor.ranging_data.range_status != 0) ? 8192u : m_sensor.ranging_data.range_mm;
     }
 }
 

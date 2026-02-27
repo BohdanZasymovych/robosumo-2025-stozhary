@@ -2,21 +2,25 @@
 #include <Arduino.h>
 
 
-#define MAX_DISTANCE_MM 900
-#define  MEMORY_MS 1200
+#define MAX_DISTANCE_MM 1000
 
-static constexpr uint8_t SPEED_PUSH   = 220; 
-static constexpr uint8_t SPEED_ATTACK = 200; 
-static constexpr uint8_t SPEED_TURN   = 140;
-static constexpr uint8_t SPEED_ROTATE = 160; 
-static constexpr uint8_t SPEED_ESCAPE_FAST = 230;
+static constexpr uint16_t MEMORY_MS = 3000u;
+
+static constexpr uint8_t SPEED_PUSH   = 255; 
+static constexpr uint8_t SPEED_ATTACK = 255; 
+static constexpr uint8_t SPEED_TURN   = 200;
+static constexpr uint8_t SPEED_ROTATE = 255;
+static constexpr uint8_t SPEED_ESCAPE_FAST = 255;
 static constexpr uint8_t SPEED_ESCAPE_SLOW = 150;
+
+// static constexpr uint16_t SEARCH_CYCLE_MS = 3500;
+// static constexpr uint16_t SEARCH_TURN_DURATION_MS = 1500;
+// static constexpr uint8_t  SPEED_SEARCH_FORWARD = 150;
+
 static constexpr uint16_t LINE_ESCAPE_MS = 240;
 static constexpr uint8_t LINE_DEBOUNCE_COUNT = 2;
 
-
 enum class LastDir : uint8_t { LEFT, RIGHT };
-
 
 static LastDir g_lastDir = LastDir::RIGHT;
 static uint32_t g_lastSeenMs = 0;
@@ -38,122 +42,106 @@ static inline uint8_t nextStreak(uint8_t current, bool detected) {
     return (current < LINE_DEBOUNCE_COUNT) ? static_cast<uint8_t>(current + 1) : current;
 }
 
-static inline bool seesFrontCenter(const SensorData& s) {
-    return s.frontCenterSensorDistance < MAX_DISTANCE_MM;
-}
-static inline bool seesFrontLeft(const SensorData& s) {
-    return s.frontLeftSensorDistance < MAX_DISTANCE_MM;
-}
-static inline bool seesFrontRight(const SensorData& s) {
-    return s.frontRightSensorDistance < MAX_DISTANCE_MM;
-}
-static inline bool seesSideLeft(const SensorData& s) {
-    return s.sideLeftSensorDistance < MAX_DISTANCE_MM;
-}
-static inline bool seesSideRight(const SensorData& s) {
-    return s.sideRightSensorDistance < MAX_DISTANCE_MM;
+struct SensorState {
+    bool frontCenter;
+    bool frontLeft;
+    bool frontRight;
+    bool sideLeft;
+    bool sideRight;
+    bool any;
+};
+
+static SensorState getSensorState(const SensorData& s) {
+    SensorState st;
+    st.frontCenter = s.frontCenterSensorDistance < MAX_DISTANCE_MM;
+    st.frontLeft   = s.frontLeftSensorDistance < MAX_DISTANCE_MM;
+    st.frontRight  = s.frontRightSensorDistance < MAX_DISTANCE_MM;
+    st.sideLeft    = s.sideLeftSensorDistance < MAX_DISTANCE_MM;
+    st.sideRight   = s.sideRightSensorDistance < MAX_DISTANCE_MM;
+    st.any         = st.frontCenter || st.frontLeft || st.frontRight || st.sideLeft || st.sideRight;
+    return st;
 }
 
-static inline bool seesAny(const SensorData& s) {
-    return seesFrontCenter(s) || seesFrontLeft(s) || seesFrontRight(s) || seesSideLeft(s) || seesSideRight(s);
-}
-
-static void updateLastSeen(const SensorData& s, uint32_t now) {
+static void updateLastSeen(const SensorState& st, uint32_t now) {
+    if (st.sideLeft && !st.sideRight) {
+        g_lastDir = LastDir::LEFT;
+        g_lastSeenMs = now;
+        return;
+    }
     
-    if (seesSideLeft(s) && !seesSideRight(s)) {
-        g_lastDir = LastDir::LEFT;
-        g_lastSeenMs = now;
-        return;
-    }
-    if (seesSideRight(s) && !seesSideLeft(s)) {
+    if (st.sideRight && !st.sideLeft) {
         g_lastDir = LastDir::RIGHT;
         g_lastSeenMs = now;
         return;
     }
 
- 
-    if (seesFrontLeft(s) && !seesFrontRight(s)) {
+    if (st.frontLeft && !st.frontRight) {
         g_lastDir = LastDir::LEFT;
         g_lastSeenMs = now;
         return;
     }
-    if (seesFrontRight(s) && !seesFrontLeft(s)) {
+    
+    if (st.frontRight && !st.frontLeft) {
         g_lastDir = LastDir::RIGHT;
         g_lastSeenMs = now;
         return;
     }
 
-    if (seesFrontCenter(s) || seesAny(s)) {
+    if (st.frontCenter || st.any) {
         g_lastSeenMs = now;
     }
 }
 
-
-
-static void attack(Robot& robot, const SensorData& s) {
-    const bool front_C = seesFrontCenter(s);
-    const bool front_L = seesFrontLeft(s);
-    const bool front_R = seesFrontRight(s);
-    const bool side_L = seesSideLeft(s);
-    const bool side_R = seesSideRight(s);
-
-    if (front_C) {
+static void attack(Robot& robot, const SensorData& s, const SensorState& st) {
+    if (st.frontCenter) {
         robot.moveForward(SPEED_PUSH);
         return;
     }
-
   
-    if (front_L && !front_R) {
+    if (st.frontLeft && !st.frontRight) {
         if (s.frontLeftSensorDistance <= 70){
             robot.turnLeft(SPEED_ROTATE);
-            
-        }
-        else {
+        } else {
             robot.turnMove(SPEED_TURN, SPEED_ATTACK);
         }
        
         return;
     }
-    if (front_R && !front_L) {
+
+    if (st.frontRight && !st.frontLeft) {
         if (s.frontRightSensorDistance <= 70){
             robot.turnRight(SPEED_ROTATE);
-        }
-        else { 
+        } else { 
             robot.turnMove(SPEED_ATTACK, SPEED_TURN);
         }
+        
         return;
-       
     }
-
    
-    if (front_L && front_R) {
+    if (st.frontLeft && st.frontRight) {
         robot.moveForward(SPEED_ATTACK);
         return;
     }
 
-    if (side_L && !side_R) {
+    if (st.sideLeft && !st.sideRight) {
         robot.turnLeft(SPEED_ROTATE);
         return;
     }
-    if (side_R && !side_L) {
+
+    if (st.sideRight && !st.sideLeft) {
         robot.turnRight(SPEED_ROTATE);
         return;
     }
 
-   
-    // if (side_L && side_R) {
-    //     if (g_lastDir == LastDir::LEFT) robot.turnLeft(SPEED_ROTATE);
-    //     else robot.turnRight(SPEED_ROTATE);
-    //     return;
-    // }
-
- 
-    robot.stop();
+    if (st.sideLeft && st.sideRight) {
+        if (g_lastDir == LastDir::LEFT) robot.turnLeft(SPEED_ROTATE);
+        else robot.turnRight(SPEED_ROTATE);
+        return;
+    }
 }
 
 static void search(Robot& robot, uint32_t now) {
-   
-    if (now - g_lastSeenMs < MEMORY_MS) {
+    if ((g_lastSeenMs > 0) && (now - g_lastSeenMs < MEMORY_MS)) {
         if (g_lastDir == LastDir::LEFT) {
             robot.turnLeft(SPEED_ROTATE);
         } else {
@@ -161,17 +149,18 @@ static void search(Robot& robot, uint32_t now) {
         }
         return;
     }
-
+    
+    robot.turnRight(SPEED_ROTATE);
  
-    const uint32_t t = now % 1500;
+    // const uint32_t t = now % SEARCH_CYCLE_MS;
 
-    if (t < 600) {
-        robot.turnRight(SPEED_ROTATE);
-    } else if (t < 1200) {
-        robot.turnLeft(SPEED_ROTATE);
-    } else {
-        robot.moveForward(150); 
-    }
+    // if (t < SEARCH_TURN_DURATION_MS) {
+    //     robot.turnRight(SPEED_ROTATE);
+    // } else {
+    //     robot.turnLeft(SPEED_ROTATE);
+    // } // else {
+    //     robot.moveForward(150); 
+    // }
 }
 
 static void applyLineEscape(Robot& robot) {
@@ -207,7 +196,6 @@ static bool handleLineEscape(Robot& robot, const SensorData& s, uint32_t now) {
         }
         g_lineEscapeUntilMs = now + LINE_ESCAPE_MS;
     }
-
     
     g_lineLeftArmed = !lineLeftDebounced;
     g_lineRightArmed = !lineRightDebounced;
@@ -221,40 +209,22 @@ static bool handleLineEscape(Robot& robot, const SensorData& s, uint32_t now) {
 }
 
 
-// void executeStrategy(Robot& robot, SensorData& sensorData) {
-//     if (sensorData.frontCenterSensorDistance < MAX_DISTANCE_MM) {
-//         robot.moveForward();
-//     } else if (sensorData.frontLeftSensorDistance < MAX_DISTANCE_MM) {
-//         // move front and turn right
-//     } else if (sensorData.frontRightSensorDistance < MAX_DISTANCE_MM) {
-//         // move front and turn left
-//     }
-// }
-
 void executeStrategy(Robot& robot, SensorData& sensorData) {
     const uint32_t now = millis();
 
-    // if (handleLineEscape(robot, sensorData, now)) {
-    //     return;
-    // }
+    if (handleLineEscape(robot, sensorData, now)) {
+        return;
+    }
 
-    updateLastSeen(sensorData, now);
+    SensorState state = getSensorState(sensorData);
 
-    if (seesAny(sensorData)) {
-        attack(robot, sensorData);
-    
+    updateLastSeen(state, now);
+
+    if (state.any) {
+        attack(robot, sensorData, state);
     } 
    
     else {
-        search(robot, now);  // if (front_R && !front_L) {
-    //     if (s.frontRightSensorDistance <= 70){
-    //         robot.turnRight(SPEED_ROTATE);
-    //     }
-    //     else { 
-    //         robot.turnMove(SPEED_ATTACK, SPEED_TURN);
-    //     }
-    //     return;
-       
-    // }
+        search(robot, now);
     }
 }
