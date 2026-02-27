@@ -7,8 +7,8 @@
 #include "linesensor.h"
 #include "strategy.h"
 #include "ladle.h"
-#include "wifi_debug.h"
 
+#define START_DELAY 5000
 
 Motor motorLeft(MOTOR_LEFT_LPWM, MOTOR_LEFT_RPWM);
 Motor motorRight(MOTOR_RIGHT_LPWM, MOTOR_RIGHT_RPWM);
@@ -20,20 +20,17 @@ Linesensor lineLeft(LINE_SENSOR_LEFT);
 Linesensor lineRight(LINE_SENSOR_RIGHT);
 SensorData sensorData;
 
-
 Ladle ladle(LADLE_SERVO1_PIN, LADLE_SERVO2_PIN, FORCE_SENSOR1_PIN, FORCE_SENSOR2_PIN);
+
 
 void setup() {
     unsigned long startTime = millis();
 
-    // Serial.begin(115200);
-
     frontSensorArray.begin();
-    // ladle.init();
     sideSensorArray.begin();
     
-    while (millis() - startTime < 5000) {}
-    }
+    while (millis() - startTime < START_DELAY) {}
+}
 
 
 void loop() {
