@@ -6,8 +6,8 @@
 SideSensors* SideSensors::s_instance = nullptr;
 
 SideSensors::SideSensors() 
-    : m_leftSensor(SIDE_LEFT_INT_PIN, SIDE_LEFT_XSHUT_PIN, SIDE_LEFT_ADDRESS),
-    m_rightSensor(SIDE_RIGHT_INT_PIN, SIDE_RIGHT_XSHUT_PIN, SIDE_RIGHT_ADDRESS) {}
+    : m_leftSensor(VL53L0X_LEFT_INT_PIN, VL53L0X_LEFT_XSHUT_PIN, VL53L0X_LEFT_ADDRESS),
+    m_rightSensor(VL53L0X_RIGHT_INT_PIN, VL53L0X_RIGHT_XSHUT_PIN, VL53L0X_RIGHT_ADDRESS) {}
 
 bool SideSensors::begin() {
     Wire1.begin(I2C_WIRE1_SDA, I2C_WIRE1_SCL);
