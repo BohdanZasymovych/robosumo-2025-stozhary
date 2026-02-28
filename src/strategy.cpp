@@ -119,15 +119,15 @@ static void attack(Robot& robot, const SensorData& s, const SensorState& st) {
         return;
     }
 
-    if (st.sideLeft && !st.sideRight) {
-        robot.turnLeft(SPEED_ROTATE);
-        return;
-    }
+    // if (st.sideLeft && !st.sideRight) {
+    //     robot.turnLeft(SPEED_ROTATE);
+    //     return;
+    // }
 
-    if (st.sideRight && !st.sideLeft) {
-        robot.turnRight(SPEED_ROTATE);
-        return;
-    }
+    // if (st.sideRight && !st.sideLeft) {
+    //     robot.turnRight(SPEED_ROTATE);
+    //     return;
+    // }
 
     if (st.sideLeft && st.sideRight) {
         if (g_lastDir == LastDir::LEFT) robot.turnLeft(SPEED_ROTATE);
@@ -137,14 +137,14 @@ static void attack(Robot& robot, const SensorData& s, const SensorState& st) {
 }
 
 static void search(Robot& robot, uint32_t now) {
-    if ((g_lastSeenMs > 0) && (now - g_lastSeenMs < MEMORY_MS)) {
-        if (g_lastDir == LastDir::LEFT) {
-            robot.turnLeft(SPEED_ROTATE);
-        } else {
-            robot.turnRight(SPEED_ROTATE);
-        }
-        return;
-    }
+    // if ((g_lastSeenMs > 0) && (now - g_lastSeenMs < MEMORY_MS)) {
+    //     if (g_lastDir == LastDir::LEFT) {
+    //         robot.turnLeft(SPEED_ROTATE);
+    //     } else {
+    //         robot.turnRight(SPEED_ROTATE);
+    //     }
+    //     return;
+    // }
     
     robot.turnRight(SPEED_ROTATE);
 }

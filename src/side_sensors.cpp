@@ -53,14 +53,14 @@ void SideSensors::recoverBus() {
 }
 
 void SideSensors::updateData(uint16_t& leftSensorPlaceToWrite, uint16_t& rightSensorPlaceToWrite) {
-    if (m_busManager->isBusStuck()) {
-        static uint32_t lastRecoveryTime = 0;
-        if (millis() - lastRecoveryTime > 500) { 
-            recoverBus();
-            lastRecoveryTime = millis();
-        }
-        return;
-    }
+    // if (m_busManager->isBusStuck()) {
+    //     static uint32_t lastRecoveryTime = 0;
+    //     if (millis() - lastRecoveryTime > 500) { 
+    //         recoverBus();
+    //         lastRecoveryTime = millis();
+    //     }
+    //     return;
+    // }
 
     m_leftSensor.updateData(leftSensorPlaceToWrite);
     m_rightSensor.updateData(rightSensorPlaceToWrite);

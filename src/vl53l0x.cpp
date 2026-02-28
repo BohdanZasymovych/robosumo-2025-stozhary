@@ -39,7 +39,10 @@ bool SensorVL53L0X::begin(TwoWire* i2cBus, float signalRateLimit, uint8_t vcselP
 }
 
 void SensorVL53L0X::updateData(uint16_t& placeToWrite) {
+    // Serial.println("Update data called");
     if (m_dataReadyFlag.exchange(false, std::memory_order_acquire)) {
+        // Serial.println("Interrupt was received");
+        // Serial.println("Interrupt was received");
         placeToWrite = m_sensor.readRangeContinuousMillimeters();
     }
 }

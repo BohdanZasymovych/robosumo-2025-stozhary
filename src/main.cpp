@@ -29,9 +29,9 @@ Linesensor lineLeft(LINE_SENSOR_LEFT);
 Linesensor lineRight(LINE_SENSOR_RIGHT);
 SensorData sensorData;
 
-Ladle ladle(LADLE_SERVO1_PIN, LADLE_SERVO2_PIN, FORCE_SENSOR1_PIN, FORCE_SENSOR2_PIN);
 
 void setup() {
+
     wire0Manager.begin();
     wire1Manager.begin();
 
@@ -45,25 +45,12 @@ void setup() {
 }
 
 void loop() {
-    if (wire0Manager.isBusStuck()) {
-        wire0Manager.recoverBus();
-        frontSensorArray.begin(&wire0Manager);
-    } else {
-        frontSensorArray.updateData(sensorData.frontLeftSensorDistance,
-                                    sensorData.frontCenterSensorDistance,
-                                    sensorData.frontRightSensorDistance);
-    }
+    frontSensorArray.updateData(sensorData.frontLeftSensorDistance,
+                                sensorData.frontCenterSensorDistance,
+                                sensorData.frontRightSensorDistance);
 
-    if (wire1Manager.isBusStuck()) {
-        wire1Manager.recoverBus();
-        sideSensorArray.begin(&wire1Manager);
-        ladleDistanceSensor.begin(&wire1Manager);
-    } else {
-        sideSensorArray.updateData(sensorData.sideLeftSensorDistance,
-                                   sensorData.sideRightSensorDistance);
-        
-        ladleDistanceSensor.updateData(sensorData.ladleSensorDistance);
-    }
+    sideSensorArray.updateData(sensorData.sideLeftSensorDistance,
+        sensorData.sideRightSensorDistance);
 
     sensorData.lineLeftDetected = lineLeft.isLineDetected();
     sensorData.lineRightDetected = lineRight.isLineDetected();
