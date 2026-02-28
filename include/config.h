@@ -91,6 +91,7 @@
 #define WIFI_SSID "UCU_Guest"
 #define WIFI_PASS ""
 
+
 // ========================================
 // LADLE
 // ========================================
@@ -99,7 +100,7 @@
 #define LADLE_SERVO1_PIN 20
 #define LADLE_SERVO2_PIN 21
 
-// Force Sensors (датчики сили/тиску)
+// Force Sensors
 #define FORCE_SENSOR1_PIN 48
 #define FORCE_SENSOR2_PIN 47
 
