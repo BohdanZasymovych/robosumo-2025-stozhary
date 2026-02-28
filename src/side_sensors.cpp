@@ -2,25 +2,21 @@
 #include "side_sensors.h"
 #include <Wire.h>
 
-
 SideSensors* SideSensors::s_instance = nullptr;
 
 SideSensors::SideSensors() 
     : m_leftSensor(VL53L0X_LEFT_INT_PIN, VL53L0X_LEFT_XSHUT_PIN, VL53L0X_LEFT_ADDRESS),
-    m_rightSensor(VL53L0X_RIGHT_INT_PIN, VL53L0X_RIGHT_XSHUT_PIN, VL53L0X_RIGHT_ADDRESS),
-    m_ladleSensor(VL53L0X_LADLE_INT_PIN, VL53L0X_LADLE_XSHUT_PIN, VL53L0X_LADLE_ADDRESS) {}
+    m_rightSensor(VL53L0X_RIGHT_INT_PIN, VL53L0X_RIGHT_XSHUT_PIN, VL53L0X_RIGHT_ADDRESS) {}
 
-bool SideSensors::begin() {
-    Wire1.begin(I2C_WIRE1_SDA, I2C_WIRE1_SCL);
-    Wire1.setClock(I2C_WIRE1_CLOCK_FREQ);
+bool SideSensors::begin(I2CBusManager* busManager) {
+    m_busManager = busManager;
 
     m_leftSensor.initHardware();
     m_rightSensor.initHardware();
     m_ladleSensor.initHardware();
 
-    if (!m_leftSensor.begin(&Wire1, VL53L0X_SIGNAL_RATE_LIMIT, VL53L0X_VCSEL_PULSE_PERIOD_PRE, VL53L0X_VCSEL_PULSE_PERIOD_FINAL, VL53L0X_MEASUREMENT_TIMING_BUDGET)) { return false; }
-    if (!m_rightSensor.begin(&Wire1, VL53L0X_SIGNAL_RATE_LIMIT, VL53L0X_VCSEL_PULSE_PERIOD_PRE, VL53L0X_VCSEL_PULSE_PERIOD_FINAL, VL53L0X_MEASUREMENT_TIMING_BUDGET)) { return false; }
-    if (!m_ladleSensor.begin(&Wire1, VL53L0X_SIGNAL_RATE_LIMIT, VL53L0X_VCSEL_PULSE_PERIOD_PRE, VL53L0X_VCSEL_PULSE_PERIOD_FINAL, VL53L0X_MEASUREMENT_TIMING_BUDGET)) { return false; }
+    if (!m_leftSensor.begin(m_busManager->getWire(), VL53L0X_SIGNAL_RATE_LIMIT, VL53L0X_VCSEL_PULSE_PERIOD_PRE, VL53L0X_VCSEL_PULSE_PERIOD_FINAL, VL53L0X_MEASUREMENT_TIMING_BUDGET)) { return false; }
+    if (!m_rightSensor.begin(m_busManager->getWire(), VL53L0X_SIGNAL_RATE_LIMIT, VL53L0X_VCSEL_PULSE_PERIOD_PRE, VL53L0X_VCSEL_PULSE_PERIOD_FINAL, VL53L0X_MEASUREMENT_TIMING_BUDGET)) { return false; }
     
     attachInterrupts();
     
@@ -59,42 +55,14 @@ void IRAM_ATTR SideSensors::ladleISR() {
 void SideSensors::recoverBus() {
     ::detachInterrupt(digitalPinToInterrupt(m_leftSensor.getIntPin()));
     ::detachInterrupt(digitalPinToInterrupt(m_rightSensor.getIntPin()));
-    ::detachInterrupt(digitalPinToInterrupt(m_ladleSensor.getIntPin()));
 
-    Wire1.end();
-    
-    pinMode(I2C_WIRE1_SDA, INPUT_PULLUP);
-    pinMode(I2C_WIRE1_SCL, INPUT_PULLUP);
-    delay(1);
+    m_busManager->recoverBus();
 
-    if (digitalRead(I2C_WIRE1_SDA) == LOW) {
-        for (int i = 0; i < 9; i++) {
-            pinMode(I2C_WIRE1_SCL, OUTPUT);
-            digitalWrite(I2C_WIRE1_SCL, LOW);
-            delayMicroseconds(5);
-            
-            pinMode(I2C_WIRE1_SCL, INPUT_PULLUP); 
-            delayMicroseconds(5);
-            
-            if (digitalRead(I2C_WIRE1_SDA) == HIGH) {
-                break;
-            }
-        }
-    }
-
-    pinMode(I2C_WIRE1_SDA, OUTPUT);
-    digitalWrite(I2C_WIRE1_SDA, LOW);
-    delayMicroseconds(5);
-    pinMode(I2C_WIRE1_SCL, INPUT_PULLUP); 
-    delayMicroseconds(5);
-    pinMode(I2C_WIRE1_SDA, INPUT_PULLUP); 
-    delay(1);
-
-    begin();
+    begin(m_busManager);
 }
 
-void SideSensors::updateData(uint16_t& leftSensorPlaceToWrite, uint16_t& rightSensorPlaceToWrite, uint16_t& ladleSensorPlaceToWrite) {
-    if (digitalRead(I2C_WIRE1_SDA) == LOW) {
+void SideSensors::updateData(uint16_t& leftSensorPlaceToWrite, uint16_t& rightSensorPlaceToWrite) {
+    if (m_busManager->isBusStuck()) {
         static uint32_t lastRecoveryTime = 0;
         if (millis() - lastRecoveryTime > 500) { 
             recoverBus();

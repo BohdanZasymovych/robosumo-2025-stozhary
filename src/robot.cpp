@@ -1,9 +1,9 @@
 #include "robot.h"
 #include <Arduino.h>
 
-#define LEFT_MOTOR_START_DELAY_MS 80
-#define LEFT_MOTOR_PRELOAD_SPEED 20
-#define RIGHT_TILT_FIX_CONSTANT 0.062f
+#define LEFT_MOTOR_START_DELAY_MS 50
+#define LEFT_MOTOR_PRELOAD_SPEED 25
+#define RIGHT_TILT_FIX_CONSTANT 0.059f
 
 Robot::Robot(Motor& left, Motor& right, uint8_t baseSpeed)
     : leftMotor(left)

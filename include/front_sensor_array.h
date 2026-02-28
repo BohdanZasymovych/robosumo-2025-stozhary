@@ -1,7 +1,6 @@
 #ifndef FRONT_SENSOR_ARRAY_H
 #define FRONT_SENSOR_ARRAY_H
 
-
 #include "sensor_vl53l0x.h"
 #include "sensor_vl53l1x.h"
 
@@ -11,6 +10,8 @@ private:
     SensorVL53L0X m_leftSensor;
     SensorVL53L1X m_centerSensor;
     SensorVL53L0X m_rightSensor;
+    
+    I2CBusManager* m_busManager;
     
     static FrontSensorArray* s_instance;
     
@@ -22,11 +23,12 @@ private:
 
 public:
     FrontSensorArray();
-    bool begin();
+    
+    bool begin(I2CBusManager* busManager); 
+    
     void updateData(uint16_t& leftSensorPlaceToWrite,
                     uint16_t& centerSensorPlaceToWrite,
                     uint16_t& rightSensorPlaceToWrite);
 };
-
 
 #endif // FRONT_SENSOR_ARRAY_H

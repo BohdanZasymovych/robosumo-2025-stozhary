@@ -92,13 +92,34 @@
 #define WIFI_SSID "UCU_Guest"
 #define WIFI_PASS ""
 
+
 // ========================================
 // LADLE
 // ========================================
 
+// VL53L1X Distance Sensor Configuration
+#define VL53L1X_LADLE_SENSOR_DISTANCE_MODE VL53L1X::DistanceMode::Short
+#define VL53L1X_LADLE_TIMING_BUDGET 32000u
+
+// VL53L1X Distance Sensor
+#define VL53L1X_LADLE_INT_PIN    0 // FREE PIN NEED TO BE SET HERE
+#define VL53L1X_LADLE_XSHUT_PIN  0 // FREE PIN NEED TO BE SET HERE
+#define VL53L1X_LADLE_ADDRESS    0x35
+
+// VL53L1X Distance Sensor Configuration
+#define VL53L1X_LADLE_SENSOR_DISTANCE_MODE VL53L1X::DistanceMode::Short
+#define VL53L1X_LADLE_TIMING_BUDGET 32000u
+
+// VL53L1X Distance Sensor
+#define VL53L1X_LADLE_INT_PIN    0 // FREE PIN NEED TO BE SET HERE
+#define VL53L1X_LADLE_XSHUT_PIN  0 // FREE PIN NEED TO BE SET HERE
+#define VL53L1X_LADLE_ADDRESS    0x35
+
 #define LADLE_SERVO1_PIN 20
 #define LADLE_SERVO2_PIN 21
 #define FORCE_SENSOR1_PIN 5
+
+
 
 #endif // PINOUT_H
 
