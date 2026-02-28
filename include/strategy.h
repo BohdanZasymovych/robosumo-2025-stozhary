@@ -12,6 +12,8 @@ struct SensorData {
 
     uint16_t sideLeftSensorDistance;
     uint16_t sideRightSensorDistance;
+    
+    uint16_t ladleSensorDistance;
 
     bool lineLeftDetected;
     bool lineRightDetected;
