@@ -1,8 +1,7 @@
 #ifndef LADLE_DISTANCE_SENSOR_H
 #define LADLE_DISTANCE_SENSOR_H
 
-#include "vl53l0x.h"
-#include "vl53l1x.h"
+#include "sensor_vl53l1x.h"
 #include "i2c_bus_manager.h"
 
 class LadleDistanceSensor {

@@ -4,6 +4,8 @@
 #include "sensor_vl53l0x.h"
 #include "sensor_vl53l1x.h"
 
+class I2CBusManager;
+
 
 class FrontSensorArray {
 private:

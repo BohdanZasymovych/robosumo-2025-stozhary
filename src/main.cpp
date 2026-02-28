@@ -13,6 +13,7 @@
 
 #define START_DELAY 5000u
 #define DEFAULT_SPEED 255u
+#define LADLE_UPDATE_PERIOD_MS 50u
 
 I2CBusManager wire0Manager(&Wire, I2C_WIRE_SDA, I2C_WIRE_SCL, I2C_WIRE_CLOCK_FREQ);
 I2CBusManager wire1Manager(&Wire1, I2C_WIRE1_SDA, I2C_WIRE1_SCL, I2C_WIRE1_CLOCK_FREQ);
@@ -29,7 +30,8 @@ Linesensor lineLeft(LINE_SENSOR_LEFT);
 Linesensor lineRight(LINE_SENSOR_RIGHT);
 SensorData sensorData;
 
-Ladle ladle(LADLE_SERVO1_PIN, LADLE_SERVO2_PIN, FORCE_SENSOR1_PIN, FORCE_SENSOR2_PIN);
+Ladle ladle(LADLE_SERVO1_PIN, LADLE_SERVO2_PIN, FORCE_SENSOR1_PIN);
+unsigned long ladleLastUpdate = 0;
 
 void setup() {
     wire0Manager.begin();
@@ -39,12 +41,15 @@ void setup() {
 
     frontSensorArray.begin(&wire0Manager);
     sideSensorArray.begin(&wire1Manager);
-    ladleDistanceSensor.begin(&wire1Manager); 
+    ladleDistanceSensor.begin(&wire1Manager);
+    ladle.init();
     
     while (millis() - startTime < START_DELAY) {}
 }
 
 void loop() {
+    unsigned long now = millis();
+
     if (wire0Manager.isBusStuck()) {
         wire0Manager.recoverBus();
         frontSensorArray.begin(&wire0Manager);
@@ -67,6 +72,11 @@ void loop() {
 
     sensorData.lineLeftDetected = lineLeft.isLineDetected();
     sensorData.lineRightDetected = lineRight.isLineDetected();
+
+    if (now - ladleLastUpdate >= LADLE_UPDATE_PERIOD_MS) {
+        ladle.update(sensorData.ladleSensorDistance, now);
+        ladleLastUpdate = now;
+    }
 
     executeStrategy(robot, sensorData);
 }

@@ -13,7 +13,6 @@ bool SideSensors::begin(I2CBusManager* busManager) {
 
     m_leftSensor.initHardware();
     m_rightSensor.initHardware();
-    m_ladleSensor.initHardware();
 
     if (!m_leftSensor.begin(m_busManager->getWire(), VL53L0X_SIGNAL_RATE_LIMIT, VL53L0X_VCSEL_PULSE_PERIOD_PRE, VL53L0X_VCSEL_PULSE_PERIOD_FINAL, VL53L0X_MEASUREMENT_TIMING_BUDGET)) { return false; }
     if (!m_rightSensor.begin(m_busManager->getWire(), VL53L0X_SIGNAL_RATE_LIMIT, VL53L0X_VCSEL_PULSE_PERIOD_PRE, VL53L0X_VCSEL_PULSE_PERIOD_FINAL, VL53L0X_MEASUREMENT_TIMING_BUDGET)) { return false; }
@@ -22,7 +21,6 @@ bool SideSensors::begin(I2CBusManager* busManager) {
     
     m_leftSensor.clearPendingInterrupt();
     m_rightSensor.clearPendingInterrupt();
-    m_ladleSensor.clearPendingInterrupt();
 
     return true;
 }
@@ -31,7 +29,6 @@ void SideSensors::attachInterrupts() {
     s_instance = this;
     ::attachInterrupt(digitalPinToInterrupt(m_leftSensor.getIntPin()), leftISR, FALLING);
     ::attachInterrupt(digitalPinToInterrupt(m_rightSensor.getIntPin()), rightISR, FALLING);
-    ::attachInterrupt(digitalPinToInterrupt(m_ladleSensor.getIntPin()), ladleISR, FALLING);
 }
 
 void IRAM_ATTR SideSensors::leftISR() {
@@ -43,12 +40,6 @@ void IRAM_ATTR SideSensors::leftISR() {
 void IRAM_ATTR SideSensors::rightISR() {
     if (s_instance) {
         s_instance->m_rightSensor.dataReadyISR();
-    }
-}
-
-void IRAM_ATTR SideSensors::ladleISR() {
-    if (s_instance) {
-        s_instance->m_ladleSensor.dataReadyISR();
     }
 }
 
@@ -73,5 +64,4 @@ void SideSensors::updateData(uint16_t& leftSensorPlaceToWrite, uint16_t& rightSe
 
     m_leftSensor.updateData(leftSensorPlaceToWrite);
     m_rightSensor.updateData(rightSensorPlaceToWrite);
-    m_ladleSensor.updateData(ladleSensorPlaceToWrite);
 }

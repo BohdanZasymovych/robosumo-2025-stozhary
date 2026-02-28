@@ -7,7 +7,7 @@ class Ladle {
 public:
     enum State { DOWN, UP, COOLDOWN };
     
-    static const int DOWN_ANGLE = 10;
+    static const int DOWN_ANGLE = 20;
     static const int UP_ANGLE = 70;
     static const uint16_t DIST_NEAR = 150;
     static const uint16_t DIST_FAR = 300;
