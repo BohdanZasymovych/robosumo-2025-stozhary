@@ -1,4 +1,4 @@
-#include "vl53l1x.h"
+#include "sensor_vl53l1x.h"
 #include "config.h"
 #include <climits>
 

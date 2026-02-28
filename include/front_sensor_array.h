@@ -2,8 +2,8 @@
 #define FRONT_SENSOR_ARRAY_H
 
 
-#include "vl53l0x.h"
-#include "vl53l1x.h"
+#include "sensor_vl53l0x.h"
+#include "sensor_vl53l1x.h"
 
 
 class FrontSensorArray {

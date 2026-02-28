@@ -67,19 +67,20 @@
 
 
 // ========================================
-// VL53L0X SIDE SENSORS 
+// VL53L0X SIDE SENSORS (Wire1)
 // ========================================
 
-// Left Sensor
 #define VL53L0X_LEFT_INT_PIN    15
 #define VL53L0X_LEFT_XSHUT_PIN  16
 #define VL53L0X_LEFT_ADDRESS    0x33
  
-// Right Sensor
 #define VL53L0X_RIGHT_INT_PIN   17
 #define VL53L0X_RIGHT_XSHUT_PIN 18
 #define VL53L0X_RIGHT_ADDRESS   0x34
 
+#define VL53L0X_LADLE_INT_PIN   47
+#define VL53L0X_LADLE_XSHUT_PIN 48
+#define VL53L0X_LADLE_ADDRESS   0x35
 
 // ========================================
 // LINE SENSORS
@@ -95,13 +96,9 @@
 // LADLE
 // ========================================
 
-// Servo Motors
 #define LADLE_SERVO1_PIN 20
 #define LADLE_SERVO2_PIN 21
-
-// Force Sensors (датчики сили/тиску)
-#define FORCE_SENSOR1_PIN 48
-#define FORCE_SENSOR2_PIN 47
+#define FORCE_SENSOR1_PIN 5
 
 #endif // PINOUT_H
 

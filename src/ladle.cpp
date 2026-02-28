@@ -1,123 +1,125 @@
 #include "ladle.h"
+#include <Arduino.h>
 
-Ladle::Ladle(int s1Pin, int s2Pin, int fs1Pin, int fs2Pin)
-    : servo1Pin(s1Pin),
-      servo2Pin(s2Pin),
-      forceSensor1Pin(fs1Pin),
-      forceSensor2Pin(fs2Pin),
-      currentAngle(LADLE_DOWN_ANGLE),
-      isLifted(false),
-      waitingForCloserDistance(false),
-      lastLowerTime(0) {
-}
+Ladle::Ladle(uint8_t s1Pin, uint8_t s2Pin, uint8_t forcePin)
+    : s1_pin(s1Pin), s2_pin(s2Pin), force_pin(forcePin),
+      state(DOWN), angle(DOWN_ANGLE),
+      force_baseline(0), force_filtered(0), calib_count(0), is_pressed(false),
+      press_cnt(0), far_cnt(0),
+      lower_time(0), lift_time(0), near_start_time(0), last_dist_update_time(0), warmup_end_time(0) {}
 
 void Ladle::init() {
-    // ESP32Servo автоматично обере PWM канали 0-1 (мотори на 2-5)
-    servo1.attach(servo1Pin);
-    servo2.attach(servo2Pin);
-    
-    pinMode(forceSensor1Pin, INPUT);
-    pinMode(forceSensor2Pin, INPUT);
-    
-    setAngle(LADLE_DOWN_ANGLE);
-    
-    Serial.println("\n=== LADLE INIT ===");
-    Serial.println("Серваки: PWM канали 0-1 (авто)");
-    Serial.println("2 датчики тиску: верхній >=170, нижній >=60");
+    s1.attach(s1_pin);
+    s2.attach(s2_pin);
+    pinMode(force_pin, INPUT);
+    setAngle(DOWN_ANGLE);
+    warmup_end_time = millis() + WARMUP_MS;
 }
 
-void Ladle::setAngle(int angle) {
-    currentAngle = angle;
-    servo1.write(currentAngle);
-    servo2.write(180 - currentAngle);
+void Ladle::setAngle(int a) {
+    angle = a;
+    s1.write(a);
+    s2.write(180 - a);
 }
 
-void Ladle::liftLadle() {
-    if (!isLifted) {
-        Serial.println("[LADLE] ПІДЙОМ на 60°");
-        setAngle(LADLE_LIFT_ANGLE);
-        isLifted = true;
+void Ladle::lift() {
+    if (state != UP) {
+        state = UP;
+        setAngle(UP_ANGLE);
+        lift_time = millis();
     }
 }
 
-void Ladle::lowerLadle() {
-    if (isLifted) {
-        Serial.println("[LADLE] ОПУСКАННЯ");
-        setAngle(LADLE_DOWN_ANGLE);
-        isLifted = false;
+void Ladle::lower() {
+    if (state != COOLDOWN) {
+        state = COOLDOWN;
+        setAngle(DOWN_ANGLE);
+        lower_time = millis();
     }
 }
 
-// Детекція різкого скачка та натиску
-bool Ladle::detectSpikeAndPressure(int sensor1Val, int sensor2Val) {
-    if (sensor1Val >= SENSOR1_PRESS_THRESHOLD) {
-        Serial.print("[SENSOR1] Натиск! Val=");
-        Serial.println(sensor1Val);
-        return true;
-    }
-
-    if (sensor2Val >= SENSOR2_PRESS_THRESHOLD) {
-        Serial.print("[SENSOR2] Натиск! Val=");
-        Serial.println(sensor2Val);
-        return true;
-    }
-
-    return false;
-}
-
-void Ladle::update(uint16_t centerDistance) {
-    // Зчитуємо обидва датчики
-    int sensor1 = analogRead(forceSensor1Pin);
-    int sensor2 = analogRead(forceSensor2Pin);
+void Ladle::update(uint16_t distMm, unsigned long ms) {
+    int raw = analogRead(force_pin);
     
-    // Логування кожні 50 ітерацій
-    static int logCounter = 0;
-    if (++logCounter % 50 == 0) {
-        Serial.print("[LADLE] S1=");
-        Serial.print(sensor1);
-        Serial.print(" | S2=");
-        Serial.print(sensor2);
-        Serial.print(" | Dist=");
-        Serial.print(centerDistance);
-        Serial.print("mm | Lifted=");
-        Serial.println(isLifted ? "YES" : "NO");
-    }
-    
-    // ========================================
-    // ДЕТЕКЦІЯ РІЗКОЇ ЗМІНИ ВІДСТАНІ
-    // ========================================
-    // delta = поточне - наступне
-    // Якщо від'ємна (противник віддаляється): опускаємо ківш
-    // Якщо додатна (противник приближується): ігноримо
-    int distanceDelta = prevDistance - centerDistance;  // поточне (prev) - наступне (current)
-    
-    if (isLifted && distanceDelta < -DISTANCE_DELTA_DROP_THRESHOLD) {
-        Serial.print("[DISTANCE] РІЗКА ЗМІНА! Delta=");
-        Serial.print(distanceDelta);
-        Serial.println(" - ПРОТИВНИК ВІДДАЛИВСЯ - ОПУСКАЄМО!");
-        lowerLadle();
-    }
-    
-    prevDistance = centerDistance;  // Зберігаємо для наступної ітерації
-    
-    // ========================================
-    // ГОЛОВНА ЛОГІКА
-    // ========================================
-    
-    // 1. Якщо відстань > 3 см - ОПУСКАЄМО
-    if (centerDistance > CENTER_DROP_DISTANCE) {
-        if (isLifted) {
-            Serial.println("[LOGIC] Відстань > 3см - опускаємо");
-            lowerLadle();
+    if (calib_count < CALIB_SAMPLES) {
+        if (calib_count == 0) {
+            force_baseline = raw;
+            force_filtered = raw;
+        } else {
+            force_baseline += raw;
+        }
+        calib_count++;
+        if (calib_count == CALIB_SAMPLES) {
+            force_baseline /= CALIB_SAMPLES;
+            force_filtered = force_baseline;
         }
         return;
     }
-
-    // 2. Детекція натиску (верхній >=170 або нижній >=60)
-    if (!isLifted) {
-        if (detectSpikeAndPressure(sensor1, sensor2)) {
-            Serial.println("[LOGIC] НАТИСК ЗАСІЧЕНО - ПІДЙОМ!");
-            liftLadle();
-        }
+    
+    force_filtered = (raw + 4 * force_filtered) / 5;
+    int delta = force_filtered - force_baseline;
+    
+    if (delta >= PRESS_ON_DELTA) is_pressed = true;
+    else if (delta <= PRESS_OFF_DELTA) is_pressed = false;
+    
+    if (ms < warmup_end_time) return;
+    
+    bool dist_valid = (distMm > 0 && distMm < MAX_DIST);
+    if (dist_valid) last_dist_update_time = ms;
+    bool dist_stale = (ms - last_dist_update_time) > STALE_MS;
+    
+    bool is_near = dist_valid && !dist_stale && (distMm <= DIST_NEAR);
+    bool is_far = !dist_valid || dist_stale || (distMm >= DIST_FAR);
+    
+    switch (state) {
+        case DOWN:
+            if (is_pressed && is_near) {
+                press_cnt++;
+                near_start_time = 0;
+                if (press_cnt >= TICKS_PRESS) {
+                    lift();
+                    press_cnt = 0;
+                    far_cnt = 0;
+                }
+            } else {
+                press_cnt = 0;
+                
+                if (is_near && !is_pressed) {
+                    if (near_start_time == 0) {
+                        near_start_time = ms;
+                    } else if (ms - near_start_time >= NEAR_HOLD_MS) {
+                        lift();
+                        near_start_time = 0;
+                        far_cnt = 0;
+                    }
+                } else {
+                    near_start_time = 0;
+                }
+            }
+            break;
+            
+        case UP:
+            if (ms - lift_time < HOLD_AFTER_LIFT_MS) {
+                far_cnt = 0;
+            } else if (!is_pressed) {
+                far_cnt++;
+                if (far_cnt >= TICKS_FAR || is_far) {
+                    lower();
+                    far_cnt = 0;
+                    press_cnt = 0;
+                }
+            } else {
+                far_cnt = 0;
+            }
+            break;
+            
+        case COOLDOWN:
+            if (ms - lower_time >= COOLDOWN_MS) {
+                state = DOWN;
+                press_cnt = 0;
+                far_cnt = 0;
+                near_start_time = 0;
+            }
+            break;
     }
 }

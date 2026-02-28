@@ -1,7 +1,7 @@
-#ifndef VL53L1X_H
-#define VL53L1X_H
+#ifndef SENSOR_VL53L1X_H
+#define SENSOR_VL53L1X_H
 
-
+#include <Arduino.h>
 #include <VL53L1X.h>
 #include <Wire.h>
 #include <atomic>
@@ -29,4 +29,4 @@ public:
 };
 
 
-#endif // VL53L1X_H
+#endif // SENSOR_VL53L1X_H

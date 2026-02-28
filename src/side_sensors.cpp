@@ -6,8 +6,9 @@
 SideSensors* SideSensors::s_instance = nullptr;
 
 SideSensors::SideSensors() 
-    : m_leftSensor(SIDE_LEFT_INT_PIN, SIDE_LEFT_XSHUT_PIN, SIDE_LEFT_ADDRESS),
-    m_rightSensor(SIDE_RIGHT_INT_PIN, SIDE_RIGHT_XSHUT_PIN, SIDE_RIGHT_ADDRESS) {}
+    : m_leftSensor(VL53L0X_LEFT_INT_PIN, VL53L0X_LEFT_XSHUT_PIN, VL53L0X_LEFT_ADDRESS),
+    m_rightSensor(VL53L0X_RIGHT_INT_PIN, VL53L0X_RIGHT_XSHUT_PIN, VL53L0X_RIGHT_ADDRESS),
+    m_ladleSensor(VL53L0X_LADLE_INT_PIN, VL53L0X_LADLE_XSHUT_PIN, VL53L0X_LADLE_ADDRESS) {}
 
 bool SideSensors::begin() {
     Wire1.begin(I2C_WIRE1_SDA, I2C_WIRE1_SCL);
@@ -15,14 +16,17 @@ bool SideSensors::begin() {
 
     m_leftSensor.initHardware();
     m_rightSensor.initHardware();
+    m_ladleSensor.initHardware();
 
     if (!m_leftSensor.begin(&Wire1, VL53L0X_SIGNAL_RATE_LIMIT, VL53L0X_VCSEL_PULSE_PERIOD_PRE, VL53L0X_VCSEL_PULSE_PERIOD_FINAL, VL53L0X_MEASUREMENT_TIMING_BUDGET)) { return false; }
     if (!m_rightSensor.begin(&Wire1, VL53L0X_SIGNAL_RATE_LIMIT, VL53L0X_VCSEL_PULSE_PERIOD_PRE, VL53L0X_VCSEL_PULSE_PERIOD_FINAL, VL53L0X_MEASUREMENT_TIMING_BUDGET)) { return false; }
+    if (!m_ladleSensor.begin(&Wire1, VL53L0X_SIGNAL_RATE_LIMIT, VL53L0X_VCSEL_PULSE_PERIOD_PRE, VL53L0X_VCSEL_PULSE_PERIOD_FINAL, VL53L0X_MEASUREMENT_TIMING_BUDGET)) { return false; }
     
     attachInterrupts();
     
     m_leftSensor.clearPendingInterrupt();
     m_rightSensor.clearPendingInterrupt();
+    m_ladleSensor.clearPendingInterrupt();
 
     return true;
 }
@@ -31,6 +35,7 @@ void SideSensors::attachInterrupts() {
     s_instance = this;
     ::attachInterrupt(digitalPinToInterrupt(m_leftSensor.getIntPin()), leftISR, FALLING);
     ::attachInterrupt(digitalPinToInterrupt(m_rightSensor.getIntPin()), rightISR, FALLING);
+    ::attachInterrupt(digitalPinToInterrupt(m_ladleSensor.getIntPin()), ladleISR, FALLING);
 }
 
 void IRAM_ATTR SideSensors::leftISR() {
@@ -45,9 +50,16 @@ void IRAM_ATTR SideSensors::rightISR() {
     }
 }
 
+void IRAM_ATTR SideSensors::ladleISR() {
+    if (s_instance) {
+        s_instance->m_ladleSensor.dataReadyISR();
+    }
+}
+
 void SideSensors::recoverBus() {
     ::detachInterrupt(digitalPinToInterrupt(m_leftSensor.getIntPin()));
     ::detachInterrupt(digitalPinToInterrupt(m_rightSensor.getIntPin()));
+    ::detachInterrupt(digitalPinToInterrupt(m_ladleSensor.getIntPin()));
 
     Wire1.end();
     
@@ -81,7 +93,7 @@ void SideSensors::recoverBus() {
     begin();
 }
 
-void SideSensors::updateData(uint16_t& leftSensorPlaceToWrite, uint16_t& rightSensorPlaceToWrite) {
+void SideSensors::updateData(uint16_t& leftSensorPlaceToWrite, uint16_t& rightSensorPlaceToWrite, uint16_t& ladleSensorPlaceToWrite) {
     if (digitalRead(I2C_WIRE1_SDA) == LOW) {
         static uint32_t lastRecoveryTime = 0;
         if (millis() - lastRecoveryTime > 500) { 
@@ -93,4 +105,5 @@ void SideSensors::updateData(uint16_t& leftSensorPlaceToWrite, uint16_t& rightSe
 
     m_leftSensor.updateData(leftSensorPlaceToWrite);
     m_rightSensor.updateData(rightSensorPlaceToWrite);
+    m_ladleSensor.updateData(ladleSensorPlaceToWrite);
 }

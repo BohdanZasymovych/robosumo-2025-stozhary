@@ -1,58 +1,61 @@
 #ifndef LADLE_H
 #define LADLE_H
 
-#include <Arduino.h>
 #include <ESP32Servo.h>
 
 class Ladle {
-private:
-    // Сервомотори (автоматично використовують PWM канали 0-1)
-    Servo servo1;
-    Servo servo2;
-    const uint8_t servo1Pin;
-    const uint8_t servo2Pin;
-
-    // Датчики тиску/сили
-    int forceSensor1Pin;  // Верхній: старт 0-100, натиск >= 170
-    int forceSensor2Pin;  // Нижній: 0=немає, натиск >= 60
-    
-    // Параметри ківша
-    const int LADLE_LIFT_ANGLE = 60;
-    const int LADLE_DOWN_ANGLE = 10;  // Дно ківша на 20° (замість 0°)
-    const int CENTER_DROP_DISTANCE = 30;  // 3 см
-    const int DISTANCE_DELTA_DROP_THRESHOLD = 50;  // Опускаємо при різкій змині > 50мм
-    
-    // Пороги тиску
-    const int SENSOR1_PRESS_THRESHOLD = 170; // Верхній: натиск >= 170
-    const int SENSOR2_PRESS_THRESHOLD = 60;  // Нижній: натиск >= 60
-    
-    // Стан ківша
-    int currentAngle;
-    bool isLifted;
-    bool waitingForCloserDistance;
-    unsigned long lastLowerTime;
-    uint16_t prevDistance = 300;  // Попередня відстань (початково далеко)
-    
-    // Приватні методи
-    void setAngle(int angle);
-    void liftLadle();
-    void lowerLadle();
-    bool detectSpikeAndPressure(int sensor1Val, int sensor2Val);
-    
 public:
-    // Конструктор
-    Ladle(int s1Pin, int s2Pin, int fs1Pin, int fs2Pin);
+    enum State { DOWN, UP, COOLDOWN };
     
-    // Ініціалізація
+    static const int DOWN_ANGLE = 10;
+    static const int UP_ANGLE = 70;
+    static const uint16_t DIST_NEAR = 150;
+    static const uint16_t DIST_FAR = 300;
+    static const uint16_t MAX_DIST = 8000;
+    
+    static const int PRESS_ON_DELTA = 150;
+    static const int PRESS_OFF_DELTA = 50;
+    static const int CALIB_SAMPLES = 50;
+    
+    static const int TICKS_PRESS = 3;
+    static const int TICKS_FAR = 5;
+    
+    static const unsigned long COOLDOWN_MS = 500;
+    static const unsigned long NEAR_HOLD_MS = 2500;
+    static const unsigned long STALE_MS = 300;
+    static const unsigned long WARMUP_MS = 500;
+    static const unsigned long HOLD_AFTER_LIFT_MS = 800;
+    
+    Ladle(uint8_t s1Pin, uint8_t s2Pin, uint8_t forcePin);
     void init();
+    void update(uint16_t distMm, unsigned long ms);
+    State getState() const { return state; }
+    int getAngle() const { return angle; }
+    bool isUp() const { return state == UP; }
+
+private:
+    Servo s1, s2;
+    uint8_t s1_pin, s2_pin, force_pin;
+    State state;
+    int angle;
     
-    // Основна функція оновлення (викликається в main loop)
-    // centerDistance - відстань центрального датчика (мм)
-    void update(uint16_t centerDistance);
+    int force_baseline;
+    int force_filtered;
+    int calib_count;
+    bool is_pressed;
     
-    // Отримання поточного стану
-    bool isUp() const { return isLifted; }
-    int getCurrentAngle() const { return currentAngle; }
+    int press_cnt;
+    int far_cnt;
+    
+    unsigned long lower_time;
+    unsigned long lift_time;
+    unsigned long near_start_time;
+    unsigned long last_dist_update_time;
+    unsigned long warmup_end_time;
+    
+    void setAngle(int a);
+    void lift();
+    void lower();
 };
 
-#endif // LADLE_H
+#endif
